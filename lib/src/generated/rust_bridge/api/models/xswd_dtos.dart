@@ -158,14 +158,29 @@ class NativeXswdProjectionLimits {
 
 enum PermissionPolicy { ask, accept, reject }
 
-enum XswdDecisionCallbackOutcome {
-  accept,
-  reject,
-  alwaysAccept,
-  alwaysReject,
-  invalidPayload,
-  timeout,
-  exception,
+@freezed
+sealed class XswdDecisionCallbackOutcome with _$XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome._();
+
+  const factory XswdDecisionCallbackOutcome.accept() =
+      XswdDecisionCallbackOutcome_Accept;
+  const factory XswdDecisionCallbackOutcome.reject() =
+      XswdDecisionCallbackOutcome_Reject;
+  const factory XswdDecisionCallbackOutcome.alwaysAccept() =
+      XswdDecisionCallbackOutcome_AlwaysAccept;
+  const factory XswdDecisionCallbackOutcome.alwaysReject() =
+      XswdDecisionCallbackOutcome_AlwaysReject;
+  const factory XswdDecisionCallbackOutcome.prefetchNoChange() =
+      XswdDecisionCallbackOutcome_PrefetchNoChange;
+  const factory XswdDecisionCallbackOutcome.prefetchGrant({
+    required List<String> permissions,
+  }) = XswdDecisionCallbackOutcome_PrefetchGrant;
+  const factory XswdDecisionCallbackOutcome.invalidPayload() =
+      XswdDecisionCallbackOutcome_InvalidPayload;
+  const factory XswdDecisionCallbackOutcome.timeout() =
+      XswdDecisionCallbackOutcome_Timeout;
+  const factory XswdDecisionCallbackOutcome.exception() =
+      XswdDecisionCallbackOutcome_Exception;
 }
 
 enum XswdNotificationCallbackOutcome {

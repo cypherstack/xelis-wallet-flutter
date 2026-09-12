@@ -55,8 +55,8 @@ final class _NativeXswdState {
       return;
     }
     final accepted = switch (outcome) {
-      generated_xswd.XswdDecisionCallbackOutcome.accept ||
-      generated_xswd.XswdDecisionCallbackOutcome.alwaysAccept => true,
+      generated_xswd.XswdDecisionCallbackOutcome_Accept() ||
+      generated_xswd.XswdDecisionCallbackOutcome_AlwaysAccept() => true,
       _ => false,
     };
     if (accepted) {

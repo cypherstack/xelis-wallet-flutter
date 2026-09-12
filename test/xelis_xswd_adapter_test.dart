@@ -348,7 +348,10 @@ void main() {
       final outcome = await delegate.applicationCallback!(
         _generatedRequest(const generated_models.XswdRequestType.application()),
       );
-      expect(outcome, generated_models.XswdDecisionCallbackOutcome.reject);
+      expect(
+        outcome,
+        const generated_models.XswdDecisionCallbackOutcome.reject(),
+      );
       await _expectInvalidXswdSession(
         wallet.closeXswdApplicationSession(application: callbackApplication),
       );
@@ -380,7 +383,7 @@ void main() {
             const generated_models.XswdRequestType.application(),
           ),
         ),
-        generated_models.XswdDecisionCallbackOutcome.accept,
+        const generated_models.XswdDecisionCallbackOutcome.accept(),
       );
       await _expectInvalidXswdSession(
         wallet.closeXswdApplicationSession(application: callbackApplication),
@@ -440,7 +443,7 @@ void main() {
       decision.complete(XelisXswdDecision.accept);
       expect(
         await pendingDecision,
-        generated_models.XswdDecisionCallbackOutcome.accept,
+        const generated_models.XswdDecisionCallbackOutcome.accept(),
       );
       final staleApplication =
           (await wallet.getXswdState()).applications.single;
@@ -474,7 +477,7 @@ void main() {
             const generated_models.XswdRequestType.application(),
           ),
         ),
-        generated_models.XswdDecisionCallbackOutcome.accept,
+        const generated_models.XswdDecisionCallbackOutcome.accept(),
       );
       expect(
         await delegate.cancelCallback!(
@@ -514,7 +517,7 @@ void main() {
               const generated_models.XswdRequestType.application(),
             ),
           ),
-          generated_models.XswdDecisionCallbackOutcome.accept,
+          const generated_models.XswdDecisionCallbackOutcome.accept(),
         );
         expect(
           await delegate.cancelCallback!(
@@ -766,7 +769,7 @@ void main() {
 
       expect(
         decision,
-        generated_models.XswdDecisionCallbackOutcome.alwaysAccept,
+        const generated_models.XswdDecisionCallbackOutcome.alwaysAccept(),
       );
       expect(received.kind, XelisXswdRequestKind.permission);
       expect(received.application.id, 'application-id');
@@ -841,7 +844,10 @@ void main() {
         ),
       );
 
-      expect(outcome, generated_models.XswdDecisionCallbackOutcome.accept);
+      expect(
+        outcome,
+        const generated_models.XswdDecisionCallbackOutcome.accept(),
+      );
       expect(received.reason, 'Account overview');
       expect(received.permissions, ['get_balance', 'subscribe']);
       expect(received.source.prefetchPermissionsRequest, same(received));
@@ -850,6 +856,73 @@ void main() {
       expect(
         () => received.permissions.add('get_asset'),
         throwsUnsupportedError,
+      );
+    });
+
+    test(
+      'selective prefetch callback takes priority over the legacy callback',
+      () async {
+        var legacyCalls = 0;
+        late XelisXswdPrefetchPermissionsRequest received;
+        final selectiveDecision = XelisXswdPrefetchDecision.grant(const [
+          'subscribe',
+        ]);
+        final delegate = _FakeGeneratedXswdWallet();
+        final wallet = NativeXelisWallet(delegate);
+        await wallet.startXswd(
+          callbacks: _callbacks(
+            onPrefetchPermissionsRequest: (_) {
+              legacyCalls++;
+              return XelisXswdDecision.accept;
+            },
+            onPrefetchPermissionsReview: (request) {
+              received = request;
+              return selectiveDecision;
+            },
+          ),
+        );
+
+        final outcome = await delegate.prefetchCallback!(
+          _generatedRequest(
+            generated_models.XswdRequestType.prefetchPermissions(
+              _validPrefetchPayload(),
+            ),
+          ),
+        );
+
+        expect(legacyCalls, 0);
+        expect(received.permissions, ['get_balance', 'subscribe']);
+        expect(
+          outcome,
+          const generated_models.XswdDecisionCallbackOutcome.prefetchGrant(
+            permissions: ['subscribe'],
+          ),
+        );
+        expect(selectiveDecision.toString(), isNot(contains('subscribe')));
+      },
+    );
+
+    test('selective prefetch noChange has a distinct bridge outcome', () async {
+      final delegate = _FakeGeneratedXswdWallet();
+      final wallet = NativeXelisWallet(delegate);
+      await wallet.startXswd(
+        callbacks: _callbacks(
+          onPrefetchPermissionsReview: (_) =>
+              const XelisXswdPrefetchDecision.noChange(),
+        ),
+      );
+
+      final outcome = await delegate.prefetchCallback!(
+        _generatedRequest(
+          generated_models.XswdRequestType.prefetchPermissions(
+            _validPrefetchPayload(),
+          ),
+        ),
+      );
+
+      expect(
+        outcome,
+        const generated_models.XswdDecisionCallbackOutcome.prefetchNoChange(),
       );
     });
 
@@ -923,7 +996,7 @@ void main() {
               ),
             ),
           ),
-          generated_models.XswdDecisionCallbackOutcome.timeout,
+          const generated_models.XswdDecisionCallbackOutcome.timeout(),
         );
       },
     );
@@ -1024,7 +1097,7 @@ void main() {
                 generated_models.XswdRequestType.permission(payload),
               ),
             ),
-            generated_models.XswdDecisionCallbackOutcome.invalidPayload,
+            const generated_models.XswdDecisionCallbackOutcome.invalidPayload(),
           );
         }
         expect(callbackCalls, 0);
@@ -1057,7 +1130,7 @@ void main() {
             ),
           ),
         ),
-        generated_models.XswdDecisionCallbackOutcome.invalidPayload,
+        const generated_models.XswdDecisionCallbackOutcome.invalidPayload(),
       );
       expect(
         await delegate.prefetchCallback!(
@@ -1072,7 +1145,7 @@ void main() {
             ),
           ),
         ),
-        generated_models.XswdDecisionCallbackOutcome.invalidPayload,
+        const generated_models.XswdDecisionCallbackOutcome.invalidPayload(),
       );
       expect(permissionCalls, 0);
       expect(prefetchCalls, 0);
@@ -1308,6 +1381,7 @@ XelisXswdCallbacks _callbacks({
   XelisXswdDecisionCallback? onApplicationRequest,
   XelisXswdDecisionCallback? onPermissionRequest,
   XelisXswdDecisionCallback? onPrefetchPermissionsRequest,
+  XelisXswdPrefetchDecisionCallback? onPrefetchPermissionsReview,
   XelisXswdNotificationCallback? onApplicationDisconnect,
 }) => XelisXswdCallbacks(
   timeout: timeout,
@@ -1319,6 +1393,7 @@ XelisXswdCallbacks _callbacks({
       onPermissionRequest ?? (_) async => XelisXswdDecision.accept,
   onPrefetchPermissionsRequest:
       onPrefetchPermissionsRequest ?? (_) async => XelisXswdDecision.accept,
+  onPrefetchPermissionsReview: onPrefetchPermissionsReview,
   onApplicationDisconnect: onApplicationDisconnect ?? (_) async {},
 );
 

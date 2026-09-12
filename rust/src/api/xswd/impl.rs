@@ -991,19 +991,49 @@ fn handle_prefetch_permissions_outcome(
     permissions: XSWDPrefetchPermissions,
     callback: Sender<Result<IndexMap<String, Permission>, Error>>,
 ) {
-    let results = match outcome {
-        XswdDecisionCallbackOutcome::Accept | XswdDecisionCallbackOutcome::AlwaysAccept => Ok(
-            prefetch_permissions_from_decision(UserPermissionDecision::Accept, permissions),
-        ),
-        XswdDecisionCallbackOutcome::Reject | XswdDecisionCallbackOutcome::AlwaysReject => {
-            Ok(IndexMap::new())
-        }
-        failure => Err(anyhow!(decision_failure_code(failure))),
-    };
+    let results = prefetch_permissions_from_outcome(outcome, permissions);
 
     if callback.send(results).is_err() {
         error!("Error while sending prefetch permissions response back to XSWD");
     }
+}
+
+fn prefetch_permissions_from_outcome(
+    outcome: XswdDecisionCallbackOutcome,
+    requested: XSWDPrefetchPermissions,
+) -> Result<IndexMap<String, Permission>> {
+    match outcome {
+        XswdDecisionCallbackOutcome::Accept | XswdDecisionCallbackOutcome::AlwaysAccept => Ok(
+            prefetch_permissions_from_decision(UserPermissionDecision::Accept, requested),
+        ),
+        XswdDecisionCallbackOutcome::Reject
+        | XswdDecisionCallbackOutcome::AlwaysReject
+        | XswdDecisionCallbackOutcome::PrefetchNoChange => Ok(IndexMap::new()),
+        XswdDecisionCallbackOutcome::PrefetchGrant { permissions } => {
+            validate_prefetch_grant(permissions, requested)
+        }
+        failure => Err(anyhow!(decision_failure_code(failure))),
+    }
+}
+
+fn validate_prefetch_grant(
+    granted: Vec<String>,
+    requested: XSWDPrefetchPermissions,
+) -> Result<IndexMap<String, Permission>> {
+    if granted.len() > requested.permissions.len() {
+        bail!("XSWD_PREFETCH_GRANT_NOT_REQUESTED");
+    }
+
+    let mut results = IndexMap::with_capacity(granted.len());
+    for permission in granted {
+        if !requested.permissions.contains(&permission) {
+            bail!("XSWD_PREFETCH_GRANT_NOT_REQUESTED");
+        }
+        if results.insert(permission, Permission::Allow).is_some() {
+            bail!("XSWD_PREFETCH_GRANT_DUPLICATE");
+        }
+    }
+    Ok(results)
 }
 
 fn prefetch_permissions_from_decision(

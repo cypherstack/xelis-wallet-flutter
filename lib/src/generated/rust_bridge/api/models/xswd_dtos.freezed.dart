@@ -933,6 +933,538 @@ as Uint8List,
 }
 
 /// @nodoc
+mixin _$XswdDecisionCallbackOutcome {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome()';
+}
+
+
+}
+
+/// @nodoc
+class $XswdDecisionCallbackOutcomeCopyWith<$Res>  {
+$XswdDecisionCallbackOutcomeCopyWith(XswdDecisionCallbackOutcome _, $Res Function(XswdDecisionCallbackOutcome) __);
+}
+
+
+/// Adds pattern-matching-related methods to [XswdDecisionCallbackOutcome].
+extension XswdDecisionCallbackOutcomePatterns on XswdDecisionCallbackOutcome {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( XswdDecisionCallbackOutcome_Accept value)?  accept,TResult Function( XswdDecisionCallbackOutcome_Reject value)?  reject,TResult Function( XswdDecisionCallbackOutcome_AlwaysAccept value)?  alwaysAccept,TResult Function( XswdDecisionCallbackOutcome_AlwaysReject value)?  alwaysReject,TResult Function( XswdDecisionCallbackOutcome_PrefetchNoChange value)?  prefetchNoChange,TResult Function( XswdDecisionCallbackOutcome_PrefetchGrant value)?  prefetchGrant,TResult Function( XswdDecisionCallbackOutcome_InvalidPayload value)?  invalidPayload,TResult Function( XswdDecisionCallbackOutcome_Timeout value)?  timeout,TResult Function( XswdDecisionCallbackOutcome_Exception value)?  exception,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept() when accept != null:
+return accept(_that);case XswdDecisionCallbackOutcome_Reject() when reject != null:
+return reject(_that);case XswdDecisionCallbackOutcome_AlwaysAccept() when alwaysAccept != null:
+return alwaysAccept(_that);case XswdDecisionCallbackOutcome_AlwaysReject() when alwaysReject != null:
+return alwaysReject(_that);case XswdDecisionCallbackOutcome_PrefetchNoChange() when prefetchNoChange != null:
+return prefetchNoChange(_that);case XswdDecisionCallbackOutcome_PrefetchGrant() when prefetchGrant != null:
+return prefetchGrant(_that);case XswdDecisionCallbackOutcome_InvalidPayload() when invalidPayload != null:
+return invalidPayload(_that);case XswdDecisionCallbackOutcome_Timeout() when timeout != null:
+return timeout(_that);case XswdDecisionCallbackOutcome_Exception() when exception != null:
+return exception(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( XswdDecisionCallbackOutcome_Accept value)  accept,required TResult Function( XswdDecisionCallbackOutcome_Reject value)  reject,required TResult Function( XswdDecisionCallbackOutcome_AlwaysAccept value)  alwaysAccept,required TResult Function( XswdDecisionCallbackOutcome_AlwaysReject value)  alwaysReject,required TResult Function( XswdDecisionCallbackOutcome_PrefetchNoChange value)  prefetchNoChange,required TResult Function( XswdDecisionCallbackOutcome_PrefetchGrant value)  prefetchGrant,required TResult Function( XswdDecisionCallbackOutcome_InvalidPayload value)  invalidPayload,required TResult Function( XswdDecisionCallbackOutcome_Timeout value)  timeout,required TResult Function( XswdDecisionCallbackOutcome_Exception value)  exception,}){
+final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept():
+return accept(_that);case XswdDecisionCallbackOutcome_Reject():
+return reject(_that);case XswdDecisionCallbackOutcome_AlwaysAccept():
+return alwaysAccept(_that);case XswdDecisionCallbackOutcome_AlwaysReject():
+return alwaysReject(_that);case XswdDecisionCallbackOutcome_PrefetchNoChange():
+return prefetchNoChange(_that);case XswdDecisionCallbackOutcome_PrefetchGrant():
+return prefetchGrant(_that);case XswdDecisionCallbackOutcome_InvalidPayload():
+return invalidPayload(_that);case XswdDecisionCallbackOutcome_Timeout():
+return timeout(_that);case XswdDecisionCallbackOutcome_Exception():
+return exception(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( XswdDecisionCallbackOutcome_Accept value)?  accept,TResult? Function( XswdDecisionCallbackOutcome_Reject value)?  reject,TResult? Function( XswdDecisionCallbackOutcome_AlwaysAccept value)?  alwaysAccept,TResult? Function( XswdDecisionCallbackOutcome_AlwaysReject value)?  alwaysReject,TResult? Function( XswdDecisionCallbackOutcome_PrefetchNoChange value)?  prefetchNoChange,TResult? Function( XswdDecisionCallbackOutcome_PrefetchGrant value)?  prefetchGrant,TResult? Function( XswdDecisionCallbackOutcome_InvalidPayload value)?  invalidPayload,TResult? Function( XswdDecisionCallbackOutcome_Timeout value)?  timeout,TResult? Function( XswdDecisionCallbackOutcome_Exception value)?  exception,}){
+final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept() when accept != null:
+return accept(_that);case XswdDecisionCallbackOutcome_Reject() when reject != null:
+return reject(_that);case XswdDecisionCallbackOutcome_AlwaysAccept() when alwaysAccept != null:
+return alwaysAccept(_that);case XswdDecisionCallbackOutcome_AlwaysReject() when alwaysReject != null:
+return alwaysReject(_that);case XswdDecisionCallbackOutcome_PrefetchNoChange() when prefetchNoChange != null:
+return prefetchNoChange(_that);case XswdDecisionCallbackOutcome_PrefetchGrant() when prefetchGrant != null:
+return prefetchGrant(_that);case XswdDecisionCallbackOutcome_InvalidPayload() when invalidPayload != null:
+return invalidPayload(_that);case XswdDecisionCallbackOutcome_Timeout() when timeout != null:
+return timeout(_that);case XswdDecisionCallbackOutcome_Exception() when exception != null:
+return exception(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  accept,TResult Function()?  reject,TResult Function()?  alwaysAccept,TResult Function()?  alwaysReject,TResult Function()?  prefetchNoChange,TResult Function( List<String> permissions)?  prefetchGrant,TResult Function()?  invalidPayload,TResult Function()?  timeout,TResult Function()?  exception,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept() when accept != null:
+return accept();case XswdDecisionCallbackOutcome_Reject() when reject != null:
+return reject();case XswdDecisionCallbackOutcome_AlwaysAccept() when alwaysAccept != null:
+return alwaysAccept();case XswdDecisionCallbackOutcome_AlwaysReject() when alwaysReject != null:
+return alwaysReject();case XswdDecisionCallbackOutcome_PrefetchNoChange() when prefetchNoChange != null:
+return prefetchNoChange();case XswdDecisionCallbackOutcome_PrefetchGrant() when prefetchGrant != null:
+return prefetchGrant(_that.permissions);case XswdDecisionCallbackOutcome_InvalidPayload() when invalidPayload != null:
+return invalidPayload();case XswdDecisionCallbackOutcome_Timeout() when timeout != null:
+return timeout();case XswdDecisionCallbackOutcome_Exception() when exception != null:
+return exception();case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  accept,required TResult Function()  reject,required TResult Function()  alwaysAccept,required TResult Function()  alwaysReject,required TResult Function()  prefetchNoChange,required TResult Function( List<String> permissions)  prefetchGrant,required TResult Function()  invalidPayload,required TResult Function()  timeout,required TResult Function()  exception,}) {final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept():
+return accept();case XswdDecisionCallbackOutcome_Reject():
+return reject();case XswdDecisionCallbackOutcome_AlwaysAccept():
+return alwaysAccept();case XswdDecisionCallbackOutcome_AlwaysReject():
+return alwaysReject();case XswdDecisionCallbackOutcome_PrefetchNoChange():
+return prefetchNoChange();case XswdDecisionCallbackOutcome_PrefetchGrant():
+return prefetchGrant(_that.permissions);case XswdDecisionCallbackOutcome_InvalidPayload():
+return invalidPayload();case XswdDecisionCallbackOutcome_Timeout():
+return timeout();case XswdDecisionCallbackOutcome_Exception():
+return exception();}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  accept,TResult? Function()?  reject,TResult? Function()?  alwaysAccept,TResult? Function()?  alwaysReject,TResult? Function()?  prefetchNoChange,TResult? Function( List<String> permissions)?  prefetchGrant,TResult? Function()?  invalidPayload,TResult? Function()?  timeout,TResult? Function()?  exception,}) {final _that = this;
+switch (_that) {
+case XswdDecisionCallbackOutcome_Accept() when accept != null:
+return accept();case XswdDecisionCallbackOutcome_Reject() when reject != null:
+return reject();case XswdDecisionCallbackOutcome_AlwaysAccept() when alwaysAccept != null:
+return alwaysAccept();case XswdDecisionCallbackOutcome_AlwaysReject() when alwaysReject != null:
+return alwaysReject();case XswdDecisionCallbackOutcome_PrefetchNoChange() when prefetchNoChange != null:
+return prefetchNoChange();case XswdDecisionCallbackOutcome_PrefetchGrant() when prefetchGrant != null:
+return prefetchGrant(_that.permissions);case XswdDecisionCallbackOutcome_InvalidPayload() when invalidPayload != null:
+return invalidPayload();case XswdDecisionCallbackOutcome_Timeout() when timeout != null:
+return timeout();case XswdDecisionCallbackOutcome_Exception() when exception != null:
+return exception();case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_Accept extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_Accept(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_Accept);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.accept()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_Reject extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_Reject(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_Reject);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.reject()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_AlwaysAccept extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_AlwaysAccept(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_AlwaysAccept);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.alwaysAccept()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_AlwaysReject extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_AlwaysReject(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_AlwaysReject);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.alwaysReject()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_PrefetchNoChange extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_PrefetchNoChange(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_PrefetchNoChange);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.prefetchNoChange()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_PrefetchGrant extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_PrefetchGrant({required  List<String> permissions}): _permissions = permissions,super._();
+  
+
+ final  List<String> _permissions;
+ List<String> get permissions {
+  if (_permissions is EqualUnmodifiableListView) return _permissions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_permissions);
+}
+
+
+/// Create a copy of XswdDecisionCallbackOutcome
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$XswdDecisionCallbackOutcome_PrefetchGrantCopyWith<XswdDecisionCallbackOutcome_PrefetchGrant> get copyWith => _$XswdDecisionCallbackOutcome_PrefetchGrantCopyWithImpl<XswdDecisionCallbackOutcome_PrefetchGrant>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_PrefetchGrant&&const DeepCollectionEquality().equals(other.permissions, _permissions));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_permissions));
+}
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.prefetchGrant(permissions: $permissions)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $XswdDecisionCallbackOutcome_PrefetchGrantCopyWith<$Res> implements $XswdDecisionCallbackOutcomeCopyWith<$Res> {
+  factory $XswdDecisionCallbackOutcome_PrefetchGrantCopyWith(XswdDecisionCallbackOutcome_PrefetchGrant value, $Res Function(XswdDecisionCallbackOutcome_PrefetchGrant) _then) = _$XswdDecisionCallbackOutcome_PrefetchGrantCopyWithImpl;
+@useResult
+$Res call({
+ List<String> permissions
+});
+
+
+
+
+}
+/// @nodoc
+class _$XswdDecisionCallbackOutcome_PrefetchGrantCopyWithImpl<$Res>
+    implements $XswdDecisionCallbackOutcome_PrefetchGrantCopyWith<$Res> {
+  _$XswdDecisionCallbackOutcome_PrefetchGrantCopyWithImpl(this._self, this._then);
+
+  final XswdDecisionCallbackOutcome_PrefetchGrant _self;
+  final $Res Function(XswdDecisionCallbackOutcome_PrefetchGrant) _then;
+
+/// Create a copy of XswdDecisionCallbackOutcome
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? permissions = null,}) {
+  return _then(XswdDecisionCallbackOutcome_PrefetchGrant(
+permissions: null == permissions ? _self._permissions : permissions // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_InvalidPayload extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_InvalidPayload(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_InvalidPayload);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.invalidPayload()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_Timeout extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_Timeout(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_Timeout);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.timeout()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class XswdDecisionCallbackOutcome_Exception extends XswdDecisionCallbackOutcome {
+  const XswdDecisionCallbackOutcome_Exception(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is XswdDecisionCallbackOutcome_Exception);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'XswdDecisionCallbackOutcome.exception()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$XswdRequestSummary {
 
  XswdRequestType get eventType; AppInfo get applicationInfo;

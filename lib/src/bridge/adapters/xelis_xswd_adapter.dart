@@ -388,13 +388,25 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
     limits: callbacks.projectionLimits,
     applicationAdapter: applicationAdapter,
   ),
-  prefetchPermissionsRequest: (request) => _runDecisionCallback(
-    callbacks.onPrefetchPermissionsRequest,
-    request,
-    timeout: callbacks.timeout,
-    limits: callbacks.projectionLimits,
-    applicationAdapter: applicationAdapter,
-  ),
+  prefetchPermissionsRequest: (request) {
+    final selective = callbacks.onPrefetchPermissionsReview;
+    if (selective != null) {
+      return _runPrefetchDecisionCallback(
+        selective,
+        request,
+        timeout: callbacks.timeout,
+        limits: callbacks.projectionLimits,
+        applicationAdapter: applicationAdapter,
+      );
+    }
+    return _runDecisionCallback(
+      callbacks.onPrefetchPermissionsRequest,
+      request,
+      timeout: callbacks.timeout,
+      limits: callbacks.projectionLimits,
+      applicationAdapter: applicationAdapter,
+    );
+  },
   applicationDisconnect: (request) {
     onApplicationDisconnectStarted(request.applicationInfo);
     return _runNotificationCallback(
@@ -521,7 +533,7 @@ Future<generated.XswdDecisionCallbackOutcome> _runDecisionCallback(
       applicationAdapter: applicationAdapter,
     );
   } catch (_) {
-    return generated.XswdDecisionCallbackOutcome.invalidPayload;
+    return const generated.XswdDecisionCallbackOutcome.invalidPayload();
   }
   try {
     final decision = await Future<XelisXswdDecision>.sync(
@@ -529,9 +541,46 @@ Future<generated.XswdDecisionCallbackOutcome> _runDecisionCallback(
     ).timeout(timeout);
     return _decisionOutcomeToGenerated(decision);
   } on TimeoutException {
-    return generated.XswdDecisionCallbackOutcome.timeout;
+    return const generated.XswdDecisionCallbackOutcome.timeout();
   } catch (_) {
-    return generated.XswdDecisionCallbackOutcome.exception;
+    return const generated.XswdDecisionCallbackOutcome.exception();
+  }
+}
+
+Future<generated.XswdDecisionCallbackOutcome> _runPrefetchDecisionCallback(
+  XelisXswdPrefetchDecisionCallback callback,
+  generated.XswdRequestSummary request, {
+  required Duration timeout,
+  required XelisXswdProjectionLimits limits,
+  required GeneratedXswdApplicationAdapter applicationAdapter,
+}) async {
+  final XelisXswdPrefetchPermissionsRequest authored;
+  try {
+    final source = xelisXswdRequestFromGenerated(
+      request,
+      limits: limits,
+      applicationAdapter: applicationAdapter,
+    );
+    authored = source.prefetchPermissionsRequest!;
+  } catch (_) {
+    return const generated.XswdDecisionCallbackOutcome.invalidPayload();
+  }
+  try {
+    final decision = await Future<XelisXswdPrefetchDecision>.sync(
+      () => callback(authored),
+    ).timeout(timeout);
+    return switch (decision) {
+      XelisXswdPrefetchNoChange() =>
+        const generated.XswdDecisionCallbackOutcome.prefetchNoChange(),
+      XelisXswdPrefetchGrant(:final permissions) =>
+        generated.XswdDecisionCallbackOutcome.prefetchGrant(
+          permissions: permissions,
+        ),
+    };
+  } on TimeoutException {
+    return const generated.XswdDecisionCallbackOutcome.timeout();
+  } catch (_) {
+    return const generated.XswdDecisionCallbackOutcome.exception();
   }
 }
 
@@ -554,12 +603,14 @@ generated.PermissionPolicy _permissionPolicyToGenerated(
 generated.XswdDecisionCallbackOutcome _decisionOutcomeToGenerated(
   XelisXswdDecision decision,
 ) => switch (decision) {
-  XelisXswdDecision.accept => generated.XswdDecisionCallbackOutcome.accept,
-  XelisXswdDecision.reject => generated.XswdDecisionCallbackOutcome.reject,
+  XelisXswdDecision.accept =>
+    const generated.XswdDecisionCallbackOutcome.accept(),
+  XelisXswdDecision.reject =>
+    const generated.XswdDecisionCallbackOutcome.reject(),
   XelisXswdDecision.alwaysAccept =>
-    generated.XswdDecisionCallbackOutcome.alwaysAccept,
+    const generated.XswdDecisionCallbackOutcome.alwaysAccept(),
   XelisXswdDecision.alwaysReject =>
-    generated.XswdDecisionCallbackOutcome.alwaysReject,
+    const generated.XswdDecisionCallbackOutcome.alwaysReject(),
 };
 
 generated.EncryptionMode? _encryptionToGenerated(

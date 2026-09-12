@@ -67,6 +67,17 @@ Only one native XSWD event handler exists at a time. The call that creates it
 fixes callbacks, timeout, and projection limits until `stopXswd()`. Relayers
 added later use that same handler configuration.
 
+`onPrefetchPermissionsReview`, when supplied, replaces the legacy prefetch
+decision callback. It receives the typed source-bound prefetch projection and
+returns either `XelisXswdPrefetchDecision.noChange()` or
+`XelisXswdPrefetchDecision.grant(...)`. Rust accepts a grant only when its
+bounded list contains no duplicates and is an exact subset of the permission
+names in that active request. Validation is atomic: an invalid result changes
+no permission, and omitted permissions remain unchanged. Without the optional
+callback, the legacy accept/reject behavior is preserved: accept grants every
+requested permission and reject changes none. XWF does not decide which wallet
+methods an application should allow or preauthorize.
+
 Only one callback, decision or notification, is tracked as active at a time,
 and later callbacks remain ordered behind it. The dispatcher continues to
 receive lifecycle events while a notification is slow. A

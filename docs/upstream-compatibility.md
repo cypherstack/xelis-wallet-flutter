@@ -8,6 +8,7 @@ capability merely to enforce an application policy.
 | --- | --- | --- |
 | XSWD request values | exact | Effective `i64`/`u64` values are Dart `BigInt`; strings and real floats keep their types. |
 | XSWD permission envelopes | adapted | Permission and prefetch envelopes are structurally validated and exposed as source-bound authored projections; method-specific parameters remain uninterpreted. |
+| XSWD prefetch decisions | adapted | Consumers may grant an exact requested subset or leave policy unchanged; native validation rejects duplicate, out-of-request, and stale results atomically. |
 | XSWD explicit signers | exact | Preserved without method- or field-name filtering. Payload access is explicit and implicit string rendering is redacted. |
 | XSWD resource budgets | adapted | Configurable projection budgets protect FRB and Dart under documented technical ceilings; they are not protocol limits. |
 | XSWD callback failures | adapted | Exceptions, timeouts, and invalid projections are technical errors. Only an explicit callback decision is a user rejection. |

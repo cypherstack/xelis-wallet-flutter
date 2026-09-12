@@ -53,6 +53,70 @@ fn prefetch_rejection_returns_no_permission() {
 }
 
 #[test]
+fn selective_prefetch_grants_only_the_requested_subset() {
+    let result = prefetch_permissions_from_outcome(
+        XswdDecisionCallbackOutcome::PrefetchGrant {
+            permissions: vec!["get_assets".to_owned()],
+        },
+        prefetch_permissions(),
+    )
+    .unwrap();
+
+    assert_eq!(result.len(), 1);
+    assert!(matches!(result["get_assets"], Permission::Allow));
+    assert!(!result.contains_key("get_balance"));
+}
+
+#[test]
+fn selective_prefetch_no_change_returns_no_permission_update() {
+    let result = prefetch_permissions_from_outcome(
+        XswdDecisionCallbackOutcome::PrefetchNoChange,
+        prefetch_permissions(),
+    )
+    .unwrap();
+
+    assert!(result.is_empty());
+}
+
+#[test]
+fn selective_prefetch_rejects_duplicates_and_unrequested_names_atomically() {
+    let duplicate = prefetch_permissions_from_outcome(
+        XswdDecisionCallbackOutcome::PrefetchGrant {
+            permissions: vec!["get_balance".to_owned(), "get_balance".to_owned()],
+        },
+        prefetch_permissions(),
+    )
+    .unwrap_err();
+    assert_eq!(duplicate.to_string(), "XSWD_PREFETCH_GRANT_DUPLICATE");
+
+    let unrequested = prefetch_permissions_from_outcome(
+        XswdDecisionCallbackOutcome::PrefetchGrant {
+            permissions: vec!["get_balance".to_owned(), "unknown".to_owned()],
+        },
+        prefetch_permissions(),
+    )
+    .unwrap_err();
+    assert_eq!(unrequested.to_string(), "XSWD_PREFETCH_GRANT_NOT_REQUESTED");
+}
+
+#[test]
+fn selective_prefetch_rejects_results_larger_than_the_request() {
+    let error = prefetch_permissions_from_outcome(
+        XswdDecisionCallbackOutcome::PrefetchGrant {
+            permissions: vec![
+                "get_balance".to_owned(),
+                "get_assets".to_owned(),
+                "extra".to_owned(),
+            ],
+        },
+        prefetch_permissions(),
+    )
+    .unwrap_err();
+
+    assert_eq!(error.to_string(), "XSWD_PREFETCH_GRANT_NOT_REQUESTED");
+}
+
+#[test]
 fn encryption_keys_require_exactly_32_bytes_without_truncation() {
     for length in [0, 31, 33] {
         let error = encryption_key(vec![7; length]).unwrap_err();

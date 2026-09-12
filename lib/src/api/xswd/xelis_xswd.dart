@@ -470,6 +470,46 @@ typedef XelisXswdNotificationCallback = FutureOr<void> Function(
 typedef XelisXswdDecisionCallback = FutureOr<XelisXswdDecision> Function(
   XelisXswdRequest request,
 );
+typedef XelisXswdPrefetchDecisionCallback =
+    FutureOr<XelisXswdPrefetchDecision> Function(
+      XelisXswdPrefetchPermissionsRequest request,
+    );
+
+/// Decision for one XSWD prefetch request.
+///
+/// A prefetch decision updates only explicitly granted methods. XWF validates
+/// the selected names as an exact subset of the originating request before the
+/// native wallet observes any change.
+sealed class XelisXswdPrefetchDecision {
+  const XelisXswdPrefetchDecision._();
+
+  const factory XelisXswdPrefetchDecision.noChange() =
+      XelisXswdPrefetchNoChange;
+
+  factory XelisXswdPrefetchDecision.grant(Iterable<String> permissions) =
+      XelisXswdPrefetchGrant;
+}
+
+/// Leaves every retained permission policy unchanged.
+final class XelisXswdPrefetchNoChange extends XelisXswdPrefetchDecision {
+  const XelisXswdPrefetchNoChange() : super._();
+
+  @override
+  String toString() => 'XelisXswdPrefetchDecision.noChange()';
+}
+
+/// Grants exactly [permissions] from the current prefetch request.
+final class XelisXswdPrefetchGrant extends XelisXswdPrefetchDecision {
+  XelisXswdPrefetchGrant(Iterable<String> permissions)
+    : permissions = List.unmodifiable(permissions),
+      super._();
+
+  final List<String> permissions;
+
+  @override
+  String toString() =>
+      'XelisXswdPrefetchDecision.grant(permissionCount=${permissions.length})';
+}
 
 /// Consumer callbacks used by the local XSWD server and relayer handler.
 ///
@@ -488,6 +528,7 @@ final class XelisXswdCallbacks {
     required this.onPermissionRequest,
     required this.onPrefetchPermissionsRequest,
     required this.onApplicationDisconnect,
+    this.onPrefetchPermissionsReview,
     this.timeout = const Duration(minutes: 1),
     this.projectionLimits = const XelisXswdProjectionLimits(),
   });
@@ -496,6 +537,13 @@ final class XelisXswdCallbacks {
   final XelisXswdDecisionCallback onApplicationRequest;
   final XelisXswdDecisionCallback onPermissionRequest;
   final XelisXswdDecisionCallback onPrefetchPermissionsRequest;
+
+  /// Optional selective prefetch callback.
+  ///
+  /// When present, this callback replaces [onPrefetchPermissionsRequest] for
+  /// prefetch events. The legacy callback remains required so existing
+  /// consumers retain source compatibility and unchanged behavior.
+  final XelisXswdPrefetchDecisionCallback? onPrefetchPermissionsReview;
   final XelisXswdNotificationCallback onApplicationDisconnect;
 
   /// Maximum time an individual XSWD callback future may remain pending.

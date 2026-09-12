@@ -4,6 +4,9 @@
 
 - Added source-bound semantic XSWD permission and prefetch projections while
   retaining the original lossless payload for compatible consumers.
+- Added optional selective XSWD prefetch decisions. Native validation applies
+  only an exact requested subset and leaves omitted permissions unchanged;
+  legacy prefetch callbacks keep their previous all-or-none behavior.
 
 ## 0.3.0
 

@@ -8402,7 +8402,30 @@ class XelisWalletFlutterBridgeApiImpl
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
-    return XswdDecisionCallbackOutcome.values[raw as int];
+    switch (raw[0]) {
+      case 0:
+        return XswdDecisionCallbackOutcome_Accept();
+      case 1:
+        return XswdDecisionCallbackOutcome_Reject();
+      case 2:
+        return XswdDecisionCallbackOutcome_AlwaysAccept();
+      case 3:
+        return XswdDecisionCallbackOutcome_AlwaysReject();
+      case 4:
+        return XswdDecisionCallbackOutcome_PrefetchNoChange();
+      case 5:
+        return XswdDecisionCallbackOutcome_PrefetchGrant(
+          permissions: dco_decode_list_String(raw[1]),
+        );
+      case 6:
+        return XswdDecisionCallbackOutcome_InvalidPayload();
+      case 7:
+        return XswdDecisionCallbackOutcome_Timeout();
+      case 8:
+        return XswdDecisionCallbackOutcome_Exception();
+      default:
+        throw Exception("unreachable");
+    }
   }
 
   @protected
@@ -11258,8 +11281,33 @@ class XelisWalletFlutterBridgeApiImpl
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var inner = sse_decode_i_32(deserializer);
-    return XswdDecisionCallbackOutcome.values[inner];
+
+    var tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        return XswdDecisionCallbackOutcome_Accept();
+      case 1:
+        return XswdDecisionCallbackOutcome_Reject();
+      case 2:
+        return XswdDecisionCallbackOutcome_AlwaysAccept();
+      case 3:
+        return XswdDecisionCallbackOutcome_AlwaysReject();
+      case 4:
+        return XswdDecisionCallbackOutcome_PrefetchNoChange();
+      case 5:
+        var var_permissions = sse_decode_list_String(deserializer);
+        return XswdDecisionCallbackOutcome_PrefetchGrant(
+          permissions: var_permissions,
+        );
+      case 6:
+        return XswdDecisionCallbackOutcome_InvalidPayload();
+      case 7:
+        return XswdDecisionCallbackOutcome_Timeout();
+      case 8:
+        return XswdDecisionCallbackOutcome_Exception();
+      default:
+        throw UnimplementedError('');
+    }
   }
 
   @protected
@@ -13928,7 +13976,29 @@ class XelisWalletFlutterBridgeApiImpl
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.index, serializer);
+    switch (self) {
+      case XswdDecisionCallbackOutcome_Accept():
+        sse_encode_i_32(0, serializer);
+      case XswdDecisionCallbackOutcome_Reject():
+        sse_encode_i_32(1, serializer);
+      case XswdDecisionCallbackOutcome_AlwaysAccept():
+        sse_encode_i_32(2, serializer);
+      case XswdDecisionCallbackOutcome_AlwaysReject():
+        sse_encode_i_32(3, serializer);
+      case XswdDecisionCallbackOutcome_PrefetchNoChange():
+        sse_encode_i_32(4, serializer);
+      case XswdDecisionCallbackOutcome_PrefetchGrant(
+        permissions: final permissions,
+      ):
+        sse_encode_i_32(5, serializer);
+        sse_encode_list_String(permissions, serializer);
+      case XswdDecisionCallbackOutcome_InvalidPayload():
+        sse_encode_i_32(6, serializer);
+      case XswdDecisionCallbackOutcome_Timeout():
+        sse_encode_i_32(7, serializer);
+      case XswdDecisionCallbackOutcome_Exception():
+        sse_encode_i_32(8, serializer);
+    }
   }
 
   @protected

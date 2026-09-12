@@ -9348,17 +9348,42 @@ impl SseDecode for crate::api::models::wallet_dtos::XelisMaxSupplyMode {
 impl SseDecode for crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <i32>::sse_decode(deserializer);
-        return match inner {
-            0 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Accept,
-            1 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Reject,
-            2 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysAccept,
-            3 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysReject,
-            4 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::InvalidPayload,
-            5 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Timeout,
-            6 => crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Exception,
-            _ => unreachable!("Invalid variant for XswdDecisionCallbackOutcome: {}", inner),
-        };
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Accept;
+            }
+            1 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Reject;
+            }
+            2 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysAccept;
+            }
+            3 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysReject;
+            }
+            4 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchNoChange;
+            }
+            5 => {
+                let mut var_permissions = <Vec<String>>::sse_decode(deserializer);
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchGrant {
+                    permissions: var_permissions,
+                };
+            }
+            6 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::InvalidPayload;
+            }
+            7 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Timeout;
+            }
+            8 => {
+                return crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Exception;
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 
@@ -11866,14 +11891,36 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::models::wallet_dtos::XelisMax
 impl flutter_rust_bridge::IntoDart for crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            Self::Accept => 0.into_dart(),
-            Self::Reject => 1.into_dart(),
-            Self::AlwaysAccept => 2.into_dart(),
-            Self::AlwaysReject => 3.into_dart(),
-            Self::InvalidPayload => 4.into_dart(),
-            Self::Timeout => 5.into_dart(),
-            Self::Exception => 6.into_dart(),
-            _ => unreachable!(),
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Accept => {
+                [0.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Reject => {
+                [1.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysAccept => {
+                [2.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysReject => {
+                [3.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchNoChange => {
+                [4.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchGrant {
+                permissions,
+            } => [5.into_dart(), permissions.into_into_dart().into_dart()].into_dart(),
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::InvalidPayload => {
+                [6.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Timeout => {
+                [7.into_dart()].into_dart()
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Exception => {
+                [8.into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
         }
     }
 }
@@ -14112,21 +14159,41 @@ impl SseEncode for crate::api::models::wallet_dtos::XelisMaxSupplyMode {
 impl SseEncode for crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <i32>::sse_encode(
-            match self {
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Accept => 0,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Reject => 1,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysAccept => 2,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysReject => 3,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::InvalidPayload => 4,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Timeout => 5,
-                crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Exception => 6,
-                _ => {
-                    unimplemented!("");
-                }
-            },
-            serializer,
-        );
+        match self {
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Accept => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Reject => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysAccept => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::AlwaysReject => {
+                <i32>::sse_encode(3, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchNoChange => {
+                <i32>::sse_encode(4, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::PrefetchGrant {
+                permissions,
+            } => {
+                <i32>::sse_encode(5, serializer);
+                <Vec<String>>::sse_encode(permissions, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::InvalidPayload => {
+                <i32>::sse_encode(6, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Timeout => {
+                <i32>::sse_encode(7, serializer);
+            }
+            crate::api::models::xswd_dtos::XswdDecisionCallbackOutcome::Exception => {
+                <i32>::sse_encode(8, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 

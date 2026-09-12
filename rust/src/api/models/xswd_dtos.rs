@@ -432,12 +432,14 @@ pub enum UserPermissionDecision {
     AlwaysReject,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum XswdDecisionCallbackOutcome {
     Accept,
     Reject,
     AlwaysAccept,
     AlwaysReject,
+    PrefetchNoChange,
+    PrefetchGrant { permissions: Vec<String> },
     InvalidPayload,
     Timeout,
     Exception,
