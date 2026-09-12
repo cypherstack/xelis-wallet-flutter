@@ -154,6 +154,18 @@ an `XelisXswdObjectValue` for permission and prefetch-permission requests and is
 absent for lifecycle notifications. XWF does not expose an intermediate JSON
 string and does not define daemon or wallet RPC DTOs.
 
+Permission callbacks also expose a semantic envelope through
+`request.permissionRequest`: the exact method name, optional parameters, and
+the originating `XelisXswdRequest`. Parameters preserve either the named
+object or positional array form; an omitted or explicit JSON null is `null`.
+Prefetch callbacks similarly expose
+`request.prefetchPermissionsRequest`, containing the optional reason, the exact
+ordered permission names, and its source request. XWF validates these envelope
+shapes before invoking the consumer. It does not normalize method names or
+interpret method-specific parameters; those decisions belong to the consumer.
+The original `payload` remains available for compatible consumers and is the
+value from which both semantic projections are derived.
+
 The sealed `XelisXswdValue` variants preserve nulls, booleans, strings,
 floating-point values, arrays, objects, and integers. Native `i64` and `u64`
 values cross the private bridge as canonical decimal strings and are exposed as

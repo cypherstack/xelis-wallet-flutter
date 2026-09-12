@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xelis_wallet_flutter/src/bridge/adapters/xelis_wallet_adapter.dart';
+import 'package:xelis_wallet_flutter/src/bridge/adapters/xelis_xswd_adapter.dart';
 import 'package:xelis_wallet_flutter/src/generated/rust_bridge/api/models/xswd_dtos.dart'
     as generated_models;
 import 'package:xelis_wallet_flutter/src/generated/rust_bridge/api/wallet.dart'
@@ -735,9 +736,13 @@ void main() {
 
       await wallet.startXswd(callbacks: callbacks);
       final generatedPayload = _generatedPayload([
-        _objectStart(7),
+        _objectStart(3),
+        _objectKey('jsonrpc'),
+        _string('2.0'),
         _objectKey('method'),
         _string('wallet.sign'),
+        _objectKey('params'),
+        _objectStart(6),
         _objectKey('secret'),
         _string('payload'),
         _objectKey('amount'),
@@ -766,21 +771,24 @@ void main() {
       expect(received.kind, XelisXswdRequestKind.permission);
       expect(received.application.id, 'application-id');
       final payload = received.payload as XelisXswdObjectValue;
+      final permission = received.permissionRequest!;
+      expect(identical(permission.source, received), isTrue);
+      expect(permission.method, 'wallet.sign');
+      final parameters = permission.parameters! as XelisXswdObjectValue;
       expect(
-        (payload.fields['method'] as XelisXswdStringValue).value,
-        'wallet.sign',
-      );
-      expect(
-        (payload.fields['amount'] as XelisXswdIntegerValue).value,
+        (parameters.fields['amount'] as XelisXswdIntegerValue).value,
         BigInt.parse('9007199254740993'),
       );
       expect(
-        (payload.fields['negative'] as XelisXswdIntegerValue).value,
+        (parameters.fields['negative'] as XelisXswdIntegerValue).value,
         BigInt.parse('-9223372036854775808'),
       );
-      expect((payload.fields['enabled'] as XelisXswdBoolValue).value, isTrue);
-      expect((payload.fields['ratio'] as XelisXswdFloatValue).value, 1.5);
-      final items = payload.fields['items'] as XelisXswdArrayValue;
+      expect(
+        (parameters.fields['enabled'] as XelisXswdBoolValue).value,
+        isTrue,
+      );
+      expect((parameters.fields['ratio'] as XelisXswdFloatValue).value, 1.5);
+      final items = parameters.fields['items'] as XelisXswdArrayValue;
       expect(items.values.first, isA<XelisXswdNullValue>());
       expect(
         (items.values.last as XelisXswdStringValue).value,
@@ -796,9 +804,13 @@ void main() {
       );
       expect(received.toString(), isNot(contains('wallet.sign')));
       expect(received.toString(), isNot(contains('payload')));
+      expect(permission.toString(), isNot(contains('wallet.sign')));
       expect(payload.toString(), isNot(contains('method')));
       expect(payload.toString(), isNot(contains('wallet.sign')));
-      expect(payload.fields['secret'].toString(), isNot(contains('payload')));
+      expect(
+        parameters.fields['secret'].toString(),
+        isNot(contains('payload')),
+      );
       expect(generatedPayload.toString(), isNot(contains('payload')));
       expect(generatedPayload.tokens[4].toString(), isNot(contains('payload')));
       expect(
@@ -806,6 +818,77 @@ void main() {
             .toString(),
         isNot(contains('payload')),
       );
+    });
+
+    test('projects a source-bound prefetch request', () async {
+      late XelisXswdPrefetchPermissionsRequest received;
+      final delegate = _FakeGeneratedXswdWallet();
+      final wallet = NativeXelisWallet(delegate);
+      await wallet.startXswd(
+        callbacks: _callbacks(
+          onPrefetchPermissionsRequest: (request) {
+            received = request.prefetchPermissionsRequest!;
+            return XelisXswdDecision.accept;
+          },
+        ),
+      );
+
+      final outcome = await delegate.prefetchCallback!(
+        _generatedRequest(
+          generated_models.XswdRequestType.prefetchPermissions(
+            _validPrefetchPayload(),
+          ),
+        ),
+      );
+
+      expect(outcome, generated_models.XswdDecisionCallbackOutcome.accept);
+      expect(received.reason, 'Account overview');
+      expect(received.permissions, ['get_balance', 'subscribe']);
+      expect(received.source.prefetchPermissionsRequest, same(received));
+      expect(received.toString(), isNot(contains('Account overview')));
+      expect(received.toString(), isNot(contains('get_balance')));
+      expect(
+        () => received.permissions.add('get_asset'),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('preserves JSON null and positional permission parameters', () {
+      final positional = xelisXswdRequestFromGenerated(
+        _generatedRequest(
+          generated_models.XswdRequestType.permission(
+            _generatedPayload([
+              _objectStart(3),
+              _objectKey('jsonrpc'),
+              _string('2.0'),
+              _objectKey('method'),
+              _string('get_balance'),
+              _objectKey('params'),
+              _arrayStart(1),
+              _integer('9007199254740993'),
+            ]),
+          ),
+        ),
+      );
+      final explicitNull = xelisXswdRequestFromGenerated(
+        _generatedRequest(
+          generated_models.XswdRequestType.prefetchPermissions(
+            _generatedPayload([
+              _objectStart(2),
+              _objectKey('reason'),
+              _null(),
+              _objectKey('permissions'),
+              _arrayStart(0),
+            ]),
+          ),
+        ),
+      );
+
+      expect(
+        positional.permissionRequest!.parameters,
+        isA<XelisXswdArrayValue>(),
+      );
+      expect(explicitNull.prefetchPermissionsRequest!.reason, isNull);
     });
 
     test(
@@ -836,7 +919,7 @@ void main() {
           await delegate.permissionCallback!(
             _generatedRequest(
               generated_models.XswdRequestType.permission(
-                _generatedPayload([_objectStart(0)]),
+                _validPermissionPayload(),
               ),
             ),
           ),
@@ -947,6 +1030,53 @@ void main() {
         expect(callbackCalls, 0);
       },
     );
+
+    test('rejects malformed semantic envelopes before callbacks', () async {
+      var permissionCalls = 0;
+      var prefetchCalls = 0;
+      final delegate = _FakeGeneratedXswdWallet();
+      final wallet = NativeXelisWallet(delegate);
+      await wallet.startXswd(
+        callbacks: _callbacks(
+          onPermissionRequest: (_) {
+            permissionCalls++;
+            return XelisXswdDecision.accept;
+          },
+          onPrefetchPermissionsRequest: (_) {
+            prefetchCalls++;
+            return XelisXswdDecision.accept;
+          },
+        ),
+      );
+
+      expect(
+        await delegate.permissionCallback!(
+          _generatedRequest(
+            generated_models.XswdRequestType.permission(
+              _generatedPayload([_objectStart(0)]),
+            ),
+          ),
+        ),
+        generated_models.XswdDecisionCallbackOutcome.invalidPayload,
+      );
+      expect(
+        await delegate.prefetchCallback!(
+          _generatedRequest(
+            generated_models.XswdRequestType.prefetchPermissions(
+              _generatedPayload([
+                _objectStart(1),
+                _objectKey('permissions'),
+                _arrayStart(1),
+                _integer('1'),
+              ]),
+            ),
+          ),
+        ),
+        generated_models.XswdDecisionCallbackOutcome.invalidPayload,
+      );
+      expect(permissionCalls, 0);
+      expect(prefetchCalls, 0);
+    });
 
     test('rejects invalid relayer keys before the generated call', () async {
       final delegate = _FakeGeneratedXswdWallet();
@@ -1177,6 +1307,7 @@ XelisXswdCallbacks _callbacks({
   XelisXswdNotificationCallback? onCancelRequest,
   XelisXswdDecisionCallback? onApplicationRequest,
   XelisXswdDecisionCallback? onPermissionRequest,
+  XelisXswdDecisionCallback? onPrefetchPermissionsRequest,
   XelisXswdNotificationCallback? onApplicationDisconnect,
 }) => XelisXswdCallbacks(
   timeout: timeout,
@@ -1186,7 +1317,8 @@ XelisXswdCallbacks _callbacks({
       onApplicationRequest ?? (_) async => XelisXswdDecision.accept,
   onPermissionRequest:
       onPermissionRequest ?? (_) async => XelisXswdDecision.accept,
-  onPrefetchPermissionsRequest: (_) async => XelisXswdDecision.accept,
+  onPrefetchPermissionsRequest:
+      onPrefetchPermissionsRequest ?? (_) async => XelisXswdDecision.accept,
   onApplicationDisconnect: onApplicationDisconnect ?? (_) async {},
 );
 
@@ -1214,6 +1346,26 @@ generated_models.XswdRequestSummary _generatedRequest(
 generated_models.NativeXswdPayload _generatedPayload(
   List<generated_models.NativeXswdPayloadToken> tokens,
 ) => generated_models.NativeXswdPayload(tokens: tokens);
+
+generated_models.NativeXswdPayload _validPermissionPayload() =>
+    _generatedPayload([
+      _objectStart(2),
+      _objectKey('jsonrpc'),
+      _string('2.0'),
+      _objectKey('method'),
+      _string('get_balance'),
+    ]);
+
+generated_models.NativeXswdPayload _validPrefetchPayload() =>
+    _generatedPayload([
+      _objectStart(2),
+      _objectKey('reason'),
+      _string('Account overview'),
+      _objectKey('permissions'),
+      _arrayStart(2),
+      _string('get_balance'),
+      _string('subscribe'),
+    ]);
 
 generated_models.NativeXswdPayloadToken _null() =>
     const generated_models.NativeXswdPayloadToken(
@@ -1309,6 +1461,10 @@ final class _FakeGeneratedXswdWallet implements generated_wallet.XelisWallet {
     generated_models.XswdRequestSummary,
   )?
   applicationCallback;
+  FutureOr<generated_models.XswdDecisionCallbackOutcome> Function(
+    generated_models.XswdRequestSummary,
+  )?
+  prefetchCallback;
   FutureOr<generated_models.XswdNotificationCallbackOutcome> Function(
     generated_models.XswdRequestSummary,
   )?
@@ -1348,6 +1504,7 @@ final class _FakeGeneratedXswdWallet implements generated_wallet.XelisWallet {
     cancelCallback = cancelRequestDartCallback;
     applicationCallback = requestApplicationDartCallback;
     permissionCallback = requestPermissionDartCallback;
+    prefetchCallback = requestPrefetchPermissionsDartCallback;
     disconnectCallback = appDisconnectDartCallback;
     running = true;
   }

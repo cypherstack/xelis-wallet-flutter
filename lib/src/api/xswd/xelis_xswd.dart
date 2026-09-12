@@ -269,6 +269,21 @@ final class XelisXswdRequest {
   final XelisXswdApplication application;
   final XelisXswdValue? payload;
 
+  /// Typed view of a permission request, bound to this exact [XelisXswdRequest].
+  ///
+  /// The JSON-RPC method is preserved exactly. [XelisXswdPermissionRequest.parameters]
+  /// remains an authored XSWD value tree: XWF validates the envelope shape but
+  /// leaves method-specific interpretation to the consumer.
+  XelisXswdPermissionRequest? get permissionRequest =>
+      _permissionRequestFor(this);
+
+  /// Typed view of a prefetch request, bound to this exact [XelisXswdRequest].
+  ///
+  /// Permission names are preserved exactly and are not normalized or filtered
+  /// by XWF.
+  XelisXswdPrefetchPermissionsRequest? get prefetchPermissionsRequest =>
+      _prefetchPermissionsRequestFor(this);
+
   bool get isApplicationRequest => kind == XelisXswdRequestKind.application;
   bool get isPermissionRequest => kind == XelisXswdRequestKind.permission;
   bool get isPrefetchPermissionsRequest =>
@@ -280,6 +295,122 @@ final class XelisXswdRequest {
   @override
   String toString() =>
       'XelisXswdRequest(kind=$kind, hasPayload=${payload != null})';
+}
+
+/// Typed XSWD JSON-RPC permission request.
+///
+/// Instances can only be obtained from [XelisXswdRequest.permissionRequest].
+/// [source] lets consumers prove that a validated projection belongs to the
+/// request currently being decided.
+final class XelisXswdPermissionRequest {
+  XelisXswdPermissionRequest._({
+    required this.source,
+    required this.method,
+    required this.parameters,
+  });
+
+  final XelisXswdRequest source;
+  final String method;
+
+  /// Named or positional JSON-RPC parameters. An omitted or explicit JSON null
+  /// is represented as `null`.
+  final XelisXswdValue? parameters;
+
+  @override
+  String toString() =>
+      'XelisXswdPermissionRequest(hasParameters=${parameters != null})';
+}
+
+/// Typed XSWD request for a batch of wallet permissions.
+///
+/// Instances can only be obtained from
+/// [XelisXswdRequest.prefetchPermissionsRequest]. Permission identifiers and
+/// [reason] may be controlled by an external application and are omitted from
+/// [toString].
+final class XelisXswdPrefetchPermissionsRequest {
+  XelisXswdPrefetchPermissionsRequest._({
+    required this.source,
+    required this.reason,
+    required List<String> permissions,
+  }) : permissions = List.unmodifiable(permissions);
+
+  final XelisXswdRequest source;
+  final String? reason;
+  final List<String> permissions;
+
+  @override
+  String toString() =>
+      'XelisXswdPrefetchPermissionsRequest('
+      'permissionCount=${permissions.length}, hasReason=${reason != null})';
+}
+
+final Expando<XelisXswdPermissionRequest> _permissionRequests =
+    Expando<XelisXswdPermissionRequest>('xelis-xswd-permission-request');
+final Expando<XelisXswdPrefetchPermissionsRequest> _prefetchRequests =
+    Expando<XelisXswdPrefetchPermissionsRequest>(
+      'xelis-xswd-prefetch-permissions-request',
+    );
+
+XelisXswdPermissionRequest? _permissionRequestFor(XelisXswdRequest source) {
+  if (!source.isPermissionRequest) return null;
+  final cached = _permissionRequests[source];
+  if (cached != null) return cached;
+  final payload = _requireXswdObjectPayload(source);
+  final version = payload.fields['jsonrpc'];
+  final method = payload.fields['method'];
+  final rawParameters = payload.fields['params'];
+  if (version is! XelisXswdStringValue ||
+      version.value != '2.0' ||
+      method is! XelisXswdStringValue ||
+      method.value.isEmpty) {
+    throw const FormatException('Invalid XSWD permission request envelope.');
+  }
+  final request = XelisXswdPermissionRequest._(
+    source: source,
+    method: method.value,
+    parameters: rawParameters is XelisXswdNullValue ? null : rawParameters,
+  );
+  _permissionRequests[source] = request;
+  return request;
+}
+
+XelisXswdPrefetchPermissionsRequest? _prefetchPermissionsRequestFor(
+  XelisXswdRequest source,
+) {
+  if (!source.isPrefetchPermissionsRequest) return null;
+  final cached = _prefetchRequests[source];
+  if (cached != null) return cached;
+  final payload = _requireXswdObjectPayload(source);
+  final rawReason = payload.fields['reason'];
+  final rawPermissions = payload.fields['permissions'];
+  if ((rawReason != null &&
+          rawReason is! XelisXswdStringValue &&
+          rawReason is! XelisXswdNullValue) ||
+      rawPermissions is! XelisXswdArrayValue) {
+    throw const FormatException('Invalid XSWD prefetch request envelope.');
+  }
+  final permissions = <String>[];
+  for (final value in rawPermissions.values) {
+    if (value is! XelisXswdStringValue) {
+      throw const FormatException('Invalid XSWD prefetch permission name.');
+    }
+    permissions.add(value.value);
+  }
+  final request = XelisXswdPrefetchPermissionsRequest._(
+    source: source,
+    reason: rawReason is XelisXswdStringValue ? rawReason.value : null,
+    permissions: permissions,
+  );
+  _prefetchRequests[source] = request;
+  return request;
+}
+
+XelisXswdObjectValue _requireXswdObjectPayload(XelisXswdRequest source) {
+  final payload = source.payload;
+  if (payload is! XelisXswdObjectValue) {
+    throw const FormatException('Missing XSWD request payload.');
+  }
+  return payload;
 }
 
 /// Supported encryption algorithms for one relayed XSWD session.

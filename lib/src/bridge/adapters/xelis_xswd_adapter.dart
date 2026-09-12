@@ -68,11 +68,24 @@ XelisXswdRequest xelisXswdRequestFromGenerated(
     ),
   };
 
-  return XelisXswdRequest(
+  final authored = XelisXswdRequest(
     kind: kind,
     application: applicationAdapter(request.applicationInfo),
     payload: payload,
   );
+  // Validate the semantic envelope before any untrusted request reaches the
+  // consumer callback. Method-specific parameters remain uninterpreted.
+  switch (kind) {
+    case XelisXswdRequestKind.permission:
+      authored.permissionRequest;
+    case XelisXswdRequestKind.prefetchPermissions:
+      authored.prefetchPermissionsRequest;
+    case XelisXswdRequestKind.application ||
+        XelisXswdRequestKind.cancel ||
+        XelisXswdRequestKind.applicationDisconnect:
+      break;
+  }
+  return authored;
 }
 
 XelisXswdObjectValue _xswdPayloadFromGenerated(

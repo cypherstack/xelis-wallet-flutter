@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Added source-bound semantic XSWD permission and prefetch projections while
+  retaining the original lossless payload for compatible consumers.
+
 ## 0.3.0
 
 - Fixed Android ARM64 and x86_64 Rust shared-library linking to explicitly

@@ -13,6 +13,30 @@ void main() {
           tokens: [
             generated.NativeXswdPayloadToken(
               kind: generated.NativeXswdPayloadTokenKind.objectStart,
+              length: 3,
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.objectKey,
+              textValue: 'jsonrpc',
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.stringValue,
+              textValue: '2.0',
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.objectKey,
+              textValue: 'method',
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.stringValue,
+              textValue: 'get_balance',
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.objectKey,
+              textValue: 'params',
+            ),
+            generated.NativeXswdPayloadToken(
+              kind: generated.NativeXswdPayloadTokenKind.objectStart,
               length: 1,
             ),
             generated.NativeXswdPayloadToken(
@@ -38,13 +62,16 @@ void main() {
     );
 
     final authored = xelisXswdRequestFromGenerated(request);
-    final payload = authored.payload as XelisXswdObjectValue;
-    final amount = payload.fields['amount'] as XelisXswdIntegerValue;
+    final permission = authored.permissionRequest!;
+    final parameters = permission.parameters! as XelisXswdObjectValue;
+    final amount = parameters.fields['amount'] as XelisXswdIntegerValue;
 
+    expect(identical(permission.source, authored), isTrue);
+    expect(permission.method, 'get_balance');
     expect(amount.value, BigInt.parse(decimal));
     expect(amount.value.toString(), decimal);
     expect(authored.toString(), isNot(contains(decimal)));
-    expect(payload.toString(), isNot(contains('amount')));
+    expect(permission.toString(), isNot(contains('get_balance')));
     expect(amount.toString(), isNot(contains(decimal)));
   });
 }
