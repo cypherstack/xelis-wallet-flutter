@@ -2,6 +2,8 @@
 
 ## 0.4.0
 
+- Added independent optional XSWD decision and lifecycle-notification callback
+  timeouts, with the existing one-minute `timeout` retained as their fallback.
 - Added source-bound semantic XSWD permission and prefetch projections while
   retaining the original lossless payload for compatible consumers.
 - Added optional selective XSWD prefetch decisions. Native validation applies

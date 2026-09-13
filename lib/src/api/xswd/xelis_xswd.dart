@@ -605,6 +605,8 @@ final class XelisXswdCallbacks {
     this.onPrefetchPermissionsReview,
     this.onApplicationStateObservation,
     this.timeout = const Duration(minutes: 1),
+    this.decisionTimeout,
+    this.notificationTimeout,
     this.projectionLimits = const XelisXswdProjectionLimits(),
   });
 
@@ -628,8 +630,23 @@ final class XelisXswdCallbacks {
   final XelisXswdApplicationStateObservationCallback?
   onApplicationStateObservation;
 
-  /// Maximum time an individual XSWD callback future may remain pending.
+  /// Fallback maximum time an individual XSWD callback may remain pending.
+  ///
+  /// [decisionTimeout] and [notificationTimeout] override this value for their
+  /// respective callback categories. Existing consumers that set only
+  /// [timeout] retain the previous behavior.
   final Duration timeout;
+
+  /// Maximum time a decision callback may remain pending.
+  ///
+  /// Applies to application, permission, legacy prefetch, and selective
+  /// prefetch decisions. When absent, [timeout] is used.
+  final Duration? decisionTimeout;
+
+  /// Maximum time a cancellation or disconnect notification may remain pending.
+  ///
+  /// When absent, [timeout] is used.
+  final Duration? notificationTimeout;
 
   /// Resource budget fixed when these callbacks create the native handler.
   final XelisXswdProjectionLimits projectionLimits;

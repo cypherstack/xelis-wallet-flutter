@@ -1233,6 +1233,7 @@ void main() {
             timeout: const Duration(microseconds: 1),
             onCancelRequest: (_) => throw StateError('sensitive callback data'),
             onPermissionRequest: (_) => Completer<XelisXswdDecision>().future,
+            onApplicationDisconnect: (_) => Completer<void>().future,
           ),
         );
 
@@ -1257,8 +1258,180 @@ void main() {
           ),
           const generated_models.XswdDecisionCallbackOutcome.timeout(),
         );
+        expect(
+          await delegate.disconnectCallback!(
+            _generatedRequest(
+              const generated_models.XswdRequestType.appDisconnect(),
+            ),
+          ),
+          generated_models.XswdNotificationCallbackOutcome.timeout,
+        );
       },
     );
+
+    test(
+      'keeps a short decision timeout separate from notifications',
+      () async {
+        final callbacks = _generatedCallbacksFor(
+          _callbacks(
+            timeout: const Duration(minutes: 1),
+            decisionTimeout: const Duration(microseconds: 1),
+            notificationTimeout: const Duration(seconds: 1),
+            onCancelRequest: (_) =>
+                Future<void>.delayed(const Duration(milliseconds: 10)),
+            onApplicationRequest: (_) => Completer<XelisXswdDecision>().future,
+            onPermissionRequest: (_) => Completer<XelisXswdDecision>().future,
+            onPrefetchPermissionsRequest: (_) =>
+                Completer<XelisXswdDecision>().future,
+          ),
+        );
+
+        expect(
+          await callbacks.cancelRequest(
+            _generatedRequest(
+              const generated_models.XswdRequestType.cancelRequest(),
+            ),
+            false,
+          ),
+          generated_models.XswdNotificationCallbackOutcome.completed,
+        );
+        expect(
+          await callbacks.applicationRequest(
+            _generatedRequest(
+              const generated_models.XswdRequestType.application(),
+            ),
+          ),
+          const generated_models.XswdDecisionCallbackOutcome.timeout(),
+        );
+        expect(
+          await callbacks.permissionRequest(
+            _generatedRequest(
+              generated_models.XswdRequestType.permission(
+                _validPermissionPayload(),
+              ),
+            ),
+          ),
+          const generated_models.XswdDecisionCallbackOutcome.timeout(),
+        );
+        expect(
+          await callbacks.prefetchPermissionsRequest(
+            _generatedRequest(
+              generated_models.XswdRequestType.prefetchPermissions(
+                _validPrefetchPayload(),
+              ),
+            ),
+          ),
+          const generated_models.XswdDecisionCallbackOutcome.timeout(),
+        );
+
+        final selectiveCallbacks = _generatedCallbacksFor(
+          _callbacks(
+            timeout: const Duration(minutes: 1),
+            decisionTimeout: const Duration(microseconds: 1),
+            onPrefetchPermissionsReview: (_) =>
+                Completer<XelisXswdPrefetchDecision>().future,
+          ),
+        );
+        expect(
+          await selectiveCallbacks.prefetchPermissionsRequest(
+            _generatedRequest(
+              generated_models.XswdRequestType.prefetchPermissions(
+                _validPrefetchPayload(),
+              ),
+            ),
+          ),
+          const generated_models.XswdDecisionCallbackOutcome.timeout(),
+        );
+      },
+    );
+
+    test(
+      'keeps a short notification timeout separate from decisions',
+      () async {
+        final callbacks = _generatedCallbacksFor(
+          _callbacks(
+            timeout: const Duration(minutes: 1),
+            decisionTimeout: const Duration(seconds: 1),
+            notificationTimeout: const Duration(microseconds: 1),
+            onPermissionRequest: (_) async {
+              await Future<void>.delayed(const Duration(milliseconds: 10));
+              return XelisXswdDecision.accept;
+            },
+            onCancelRequest: (_) => Completer<void>().future,
+            onApplicationDisconnect: (_) => Completer<void>().future,
+          ),
+        );
+
+        expect(
+          await callbacks.permissionRequest(
+            _generatedRequest(
+              generated_models.XswdRequestType.permission(
+                _validPermissionPayload(),
+              ),
+            ),
+          ),
+          const generated_models.XswdDecisionCallbackOutcome.accept(),
+        );
+        expect(
+          await callbacks.cancelRequest(
+            _generatedRequest(
+              const generated_models.XswdRequestType.cancelRequest(),
+            ),
+            false,
+          ),
+          generated_models.XswdNotificationCallbackOutcome.timeout,
+        );
+        expect(
+          await callbacks.applicationDisconnect(
+            _generatedRequest(
+              const generated_models.XswdRequestType.appDisconnect(),
+            ),
+          ),
+          generated_models.XswdNotificationCallbackOutcome.timeout,
+        );
+      },
+    );
+
+    test('validates only the effective callback timeouts', () {
+      final explicit = _callbacks(
+        timeout: Duration.zero,
+        decisionTimeout: const Duration(seconds: 1),
+        notificationTimeout: const Duration(seconds: 1),
+      );
+      expect(
+        () => generatedXswdLimitsFromXelis(
+          explicit,
+          operation: XelisWalletOperation.walletXswdStart,
+        ),
+        returnsNormally,
+      );
+
+      for (final callbacks in [
+        _callbacks(timeout: Duration.zero),
+        _callbacks(decisionTimeout: Duration.zero),
+        _callbacks(notificationTimeout: Duration.zero),
+      ]) {
+        expect(
+          () => generatedXswdLimitsFromXelis(
+            callbacks,
+            operation: XelisWalletOperation.walletXswdStart,
+          ),
+          throwsA(
+            isA<XelisWalletException>()
+                .having(
+                  (error) => error.code,
+                  'code',
+                  XelisWalletErrorCode.invalidInput,
+                )
+                .having(
+                  (error) => error.nativeKind,
+                  'nativeKind',
+                  'XSWD_CALLBACK_TIMEOUT_INVALID',
+                ),
+          ),
+        );
+      }
+    });
 
     test(
       'forwards configurable projection limits and validates ceilings',
@@ -1281,7 +1454,6 @@ void main() {
         expect(delegate.lastProjectionLimits?.maxTotalTextBytes, 789);
 
         final invalidCallbacks = [
-          _callbacks(timeout: Duration.zero),
           _callbacks(limits: const XelisXswdProjectionLimits(maxDepth: 0)),
           _callbacks(
             limits: const XelisXswdProjectionLimits(
@@ -1635,6 +1807,8 @@ Future<void> _expectXswdOperationInProgress(
 
 XelisXswdCallbacks _callbacks({
   Duration timeout = const Duration(minutes: 1),
+  Duration? decisionTimeout,
+  Duration? notificationTimeout,
   XelisXswdProjectionLimits limits = const XelisXswdProjectionLimits(),
   XelisXswdNotificationCallback? onCancelRequest,
   XelisXswdDecisionCallback? onApplicationRequest,
@@ -1645,6 +1819,8 @@ XelisXswdCallbacks _callbacks({
   XelisXswdApplicationStateObservationCallback? onApplicationStateObservation,
 }) => XelisXswdCallbacks(
   timeout: timeout,
+  decisionTimeout: decisionTimeout,
+  notificationTimeout: notificationTimeout,
   projectionLimits: limits,
   onCancelRequest: onCancelRequest ?? (_) async {},
   onApplicationRequest:
@@ -1657,6 +1833,17 @@ XelisXswdCallbacks _callbacks({
   onApplicationDisconnect: onApplicationDisconnect ?? (_) async {},
   onApplicationStateObservation: onApplicationStateObservation,
 );
+
+GeneratedXswdCallbacks _generatedCallbacksFor(XelisXswdCallbacks callbacks) =>
+    generatedXswdCallbacksFromXelis(
+      callbacks,
+      applicationAdapter: xelisXswdApplicationFromGenerated,
+      onApplicationDecisionStarted: (_) {},
+      onApplicationDecisionCompleted: (_, _, _) {},
+      onDecisionCompleted: (_, _) {},
+      onCancelRequestStarted: (_, _) {},
+      onApplicationDisconnectStarted: (_) {},
+    );
 
 generated_models.AppInfo _generatedApplication({
   BigInt? sessionRef,

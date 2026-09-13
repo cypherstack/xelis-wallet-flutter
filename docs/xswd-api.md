@@ -68,8 +68,14 @@ exception, timeout, or projection failure never delays or reverses native
 cleanup or the upstream cancellation acknowledgement.
 
 Only one native XSWD event handler exists at a time. The call that creates it
-fixes callbacks, timeout, and projection limits until `stopXswd()`. Relayers
+fixes callbacks, timeouts, and projection limits until `stopXswd()`. Relayers
 added later use that same handler configuration.
+
+`timeout` remains the fallback for every callback and defaults to one minute.
+Consumers may set `decisionTimeout` for application, permission, legacy
+prefetch, and selective prefetch decisions, and `notificationTimeout` for
+cancellation and disconnect notifications. Each absent override falls back to
+`timeout`; both resulting effective durations must be strictly positive.
 
 `onPrefetchPermissionsReview`, when supplied, replaces the legacy prefetch
 decision callback. It receives the typed source-bound prefetch projection and

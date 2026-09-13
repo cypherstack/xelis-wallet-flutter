@@ -373,7 +373,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
     return _runNotificationCallback(
       callbacks.onCancelRequest,
       request,
-      timeout: callbacks.timeout,
+      timeout: callbacks.notificationTimeout ?? callbacks.timeout,
       limits: callbacks.projectionLimits,
       applicationAdapter: applicationAdapter,
     );
@@ -381,7 +381,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
   applicationRequest: (request) => _runApplicationDecisionCallback(
     callbacks.onApplicationRequest,
     request,
-    timeout: callbacks.timeout,
+    timeout: callbacks.decisionTimeout ?? callbacks.timeout,
     limits: callbacks.projectionLimits,
     applicationAdapter: applicationAdapter,
     onStarted: onApplicationDecisionStarted,
@@ -390,7 +390,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
   permissionRequest: (request) => _runDecisionCallback(
     callbacks.onPermissionRequest,
     request,
-    timeout: callbacks.timeout,
+    timeout: callbacks.decisionTimeout ?? callbacks.timeout,
     limits: callbacks.projectionLimits,
     applicationAdapter: applicationAdapter,
     onCompleted: onDecisionCompleted,
@@ -401,7 +401,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
       return _runPrefetchDecisionCallback(
         selective,
         request,
-        timeout: callbacks.timeout,
+        timeout: callbacks.decisionTimeout ?? callbacks.timeout,
         limits: callbacks.projectionLimits,
         applicationAdapter: applicationAdapter,
         onCompleted: onDecisionCompleted,
@@ -410,7 +410,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
     return _runDecisionCallback(
       callbacks.onPrefetchPermissionsRequest,
       request,
-      timeout: callbacks.timeout,
+      timeout: callbacks.decisionTimeout ?? callbacks.timeout,
       limits: callbacks.projectionLimits,
       applicationAdapter: applicationAdapter,
       onCompleted: onDecisionCompleted,
@@ -421,7 +421,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
     return _runNotificationCallback(
       callbacks.onApplicationDisconnect,
       request,
-      timeout: callbacks.timeout,
+      timeout: callbacks.notificationTimeout ?? callbacks.timeout,
       limits: callbacks.projectionLimits,
       applicationAdapter: applicationAdapter,
     );
@@ -460,12 +460,17 @@ generated.NativeXswdProjectionLimits generatedXswdLimitsFromXelis(
   XelisXswdCallbacks callbacks, {
   required XelisWalletOperation operation,
 }) {
-  if (callbacks.timeout.inMicroseconds <= 0) {
+  final decisionTimeout = callbacks.decisionTimeout ?? callbacks.timeout;
+  final notificationTimeout =
+      callbacks.notificationTimeout ?? callbacks.timeout;
+  if (decisionTimeout.inMicroseconds <= 0 ||
+      notificationTimeout.inMicroseconds <= 0) {
     throw xelisOperationPreconditionException(
       operation: operation,
       code: XelisWalletErrorCode.invalidInput,
       nativeKind: 'XSWD_CALLBACK_TIMEOUT_INVALID',
-      diagnosticMessage: 'The XSWD callback timeout must be positive.',
+      diagnosticMessage:
+          'The effective XSWD callback timeouts must be positive.',
     );
   }
 
