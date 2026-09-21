@@ -8,18 +8,31 @@ final class _NativeXswdState {
   );
   final _capabilities = <BigInt, _NativeXswdSessionCapability>{};
   var _revision = 0;
+  var _observationSequence = 0;
 
   int get revision => _revision;
 
-  GeneratedXswdCallbacks generatedCallbacks(XelisXswdCallbacks callbacks) =>
-      generatedXswdCallbacksFromXelis(
-        callbacks,
-        applicationAdapter: adaptApplication,
-        onApplicationDecisionStarted: _startXswdApplicationDecision,
-        onApplicationDecisionCompleted: _completeXswdApplicationDecision,
-        onCancelRequestStarted: _startXswdRequestCancellation,
-        onApplicationDisconnectStarted: _startXswdApplicationDisconnect,
-      );
+  GeneratedXswdCallbacks generatedCallbacks(
+    XelisXswdCallbacks callbacks, {
+    required void Function(
+      XelisXswdRequest request,
+      generated_xswd.XswdDecisionCallbackOutcome outcome,
+    )
+    onDecisionCompleted,
+  }) => generatedXswdCallbacksFromXelis(
+    callbacks,
+    applicationAdapter: adaptApplication,
+    onApplicationDecisionStarted: _startXswdApplicationDecision,
+    onApplicationDecisionCompleted: (application, request, outcome) {
+      _completeXswdApplicationDecision(application, outcome);
+      if (request != null) {
+        onDecisionCompleted(request, outcome);
+      }
+    },
+    onDecisionCompleted: onDecisionCompleted,
+    onCancelRequestStarted: _startXswdRequestCancellation,
+    onApplicationDisconnectStarted: _startXswdApplicationDisconnect,
+  );
 
   XelisXswdApplication adaptApplication(
     generated_xswd.AppInfo native, {
@@ -114,6 +127,44 @@ final class _NativeXswdState {
     return capability;
   }
 
+  _NativeXswdObservationTicket? beginObservation(
+    XelisXswdApplication application,
+    int sequence,
+  ) {
+    final capability = _applicationCapabilities[application];
+    if (capability == null ||
+        !capability.active ||
+        !identical(_capabilities[capability.sessionRef], capability)) {
+      return null;
+    }
+    capability.observationGeneration++;
+    return _NativeXswdObservationTicket(
+      capability,
+      capability.observationGeneration,
+      sequence,
+    );
+  }
+
+  int nextObservationSequence() => ++_observationSequence;
+
+  bool isObservationCurrent(_NativeXswdObservationTicket ticket) {
+    final capability = ticket.capability;
+    return capability.active &&
+        identical(_capabilities[capability.sessionRef], capability) &&
+        capability.observationGeneration == ticket.generation;
+  }
+
+  XelisXswdApplication? adaptObservedApplication(
+    generated_xswd.AppInfo native,
+    _NativeXswdObservationTicket ticket,
+  ) {
+    if (native.sessionRef != ticket.capability.sessionRef ||
+        !isObservationCurrent(ticket)) {
+      return null;
+    }
+    return adaptApplication(native, observedInState: true);
+  }
+
   void reconcile(List<generated_xswd.AppInfo> applications) {
     final current = applications.map((application) => application.sessionRef);
     final currentReferences = current.toSet();
@@ -170,4 +221,99 @@ final class _NativeXswdSessionCapability {
   var active = true;
   var admitted = false;
   var pendingApplicationDecision = false;
+  var observationGeneration = 0;
+}
+
+final class _NativeXswdObservationTicket {
+  const _NativeXswdObservationTicket(
+    this.capability,
+    this.generation,
+    this.sequence,
+  );
+
+  final _NativeXswdSessionCapability capability;
+  final int generation;
+  final int sequence;
+}
+
+final class _NativeXswdObservationExpectation {
+  _NativeXswdObservationExpectation(
+    this.application,
+    Map<String, XelisXswdPermissionPolicy> permissions,
+  ) : permissions = Map.unmodifiable(permissions);
+
+  final XelisXswdApplication application;
+  final Map<String, XelisXswdPermissionPolicy> permissions;
+
+  bool matches(generated_xswd.AppInfo application) {
+    for (final MapEntry(:key, :value) in permissions.entries) {
+      final expected = switch (value) {
+        XelisXswdPermissionPolicy.ask => generated_xswd.PermissionPolicy.ask,
+        XelisXswdPermissionPolicy.accept =>
+          generated_xswd.PermissionPolicy.accept,
+        XelisXswdPermissionPolicy.reject =>
+          generated_xswd.PermissionPolicy.reject,
+      };
+      if (application.permissions[key] != expected) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+_NativeXswdObservationExpectation? _xswdObservationExpectation(
+  XelisXswdRequest request,
+  generated_xswd.XswdDecisionCallbackOutcome outcome,
+) {
+  if (request.isApplicationRequest) {
+    return switch (outcome) {
+      generated_xswd.XswdDecisionCallbackOutcome_Accept() ||
+      generated_xswd.XswdDecisionCallbackOutcome_AlwaysAccept() =>
+        _NativeXswdObservationExpectation(request.application, const {}),
+      _ => null,
+    };
+  }
+  if (request.permissionRequest case final permission?) {
+    final policy = switch (outcome) {
+      generated_xswd.XswdDecisionCallbackOutcome_AlwaysAccept() =>
+        XelisXswdPermissionPolicy.accept,
+      generated_xswd.XswdDecisionCallbackOutcome_AlwaysReject() =>
+        XelisXswdPermissionPolicy.reject,
+      _ => null,
+    };
+    return policy == null
+        ? null
+        : _NativeXswdObservationExpectation(request.application, {
+            permission.method: policy,
+          });
+  }
+  if (request.prefetchPermissionsRequest case final prefetch?) {
+    final permissions = switch (outcome) {
+      generated_xswd.XswdDecisionCallbackOutcome_Accept() ||
+      generated_xswd.XswdDecisionCallbackOutcome_AlwaysAccept() =>
+        prefetch.permissions,
+      generated_xswd.XswdDecisionCallbackOutcome_PrefetchGrant(
+        :final permissions,
+      ) =>
+        permissions,
+      _ => const <String>[],
+    };
+    if (permissions.isEmpty) {
+      return null;
+    }
+    final requested = prefetch.permissions.toSet();
+    if (permissions.length > prefetch.permissions.length ||
+        permissions.toSet().length != permissions.length ||
+        permissions.any((permission) => !requested.contains(permission))) {
+      // Rust remains the authority for rejecting an invalid grant. Avoid
+      // observing a state that cannot be the result of this decision.
+      return null;
+    }
+    return _NativeXswdObservationExpectation(request.application, {
+      for (final permission in permissions)
+        permission: XelisXswdPermissionPolicy.accept,
+    });
+  }
+  return null;
 }

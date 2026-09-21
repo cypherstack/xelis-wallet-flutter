@@ -348,9 +348,15 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
   onApplicationDecisionStarted,
   required void Function(
     generated.AppInfo application,
+    XelisXswdRequest? request,
     generated.XswdDecisionCallbackOutcome outcome,
   )
   onApplicationDecisionCompleted,
+  required void Function(
+    XelisXswdRequest request,
+    generated.XswdDecisionCallbackOutcome outcome,
+  )
+  onDecisionCompleted,
   required void Function(
     generated.AppInfo application,
     bool cancelledApplicationAdmission,
@@ -387,6 +393,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
     timeout: callbacks.timeout,
     limits: callbacks.projectionLimits,
     applicationAdapter: applicationAdapter,
+    onCompleted: onDecisionCompleted,
   ),
   prefetchPermissionsRequest: (request) {
     final selective = callbacks.onPrefetchPermissionsReview;
@@ -397,6 +404,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
         timeout: callbacks.timeout,
         limits: callbacks.projectionLimits,
         applicationAdapter: applicationAdapter,
+        onCompleted: onDecisionCompleted,
       );
     }
     return _runDecisionCallback(
@@ -405,6 +413,7 @@ GeneratedXswdCallbacks generatedXswdCallbacksFromXelis(
       timeout: callbacks.timeout,
       limits: callbacks.projectionLimits,
       applicationAdapter: applicationAdapter,
+      onCompleted: onDecisionCompleted,
     );
   },
   applicationDisconnect: (request) {
@@ -428,19 +437,22 @@ Future<generated.XswdDecisionCallbackOutcome> _runApplicationDecisionCallback(
   required void Function(generated.AppInfo application) onStarted,
   required void Function(
     generated.AppInfo application,
+    XelisXswdRequest? request,
     generated.XswdDecisionCallbackOutcome outcome,
   )
   onCompleted,
 }) async {
   onStarted(request.applicationInfo);
+  XelisXswdRequest? authoredRequest;
   final outcome = await _runDecisionCallback(
     callback,
     request,
     timeout: timeout,
     limits: limits,
     applicationAdapter: applicationAdapter,
+    onCompleted: (authored, _) => authoredRequest = authored,
   );
-  onCompleted(request.applicationInfo, outcome);
+  onCompleted(request.applicationInfo, authoredRequest, outcome);
   return outcome;
 }
 
@@ -524,6 +536,11 @@ Future<generated.XswdDecisionCallbackOutcome> _runDecisionCallback(
   required Duration timeout,
   required XelisXswdProjectionLimits limits,
   required GeneratedXswdApplicationAdapter applicationAdapter,
+  void Function(
+    XelisXswdRequest request,
+    generated.XswdDecisionCallbackOutcome outcome,
+  )?
+  onCompleted,
 }) async {
   final XelisXswdRequest authored;
   try {
@@ -535,16 +552,19 @@ Future<generated.XswdDecisionCallbackOutcome> _runDecisionCallback(
   } catch (_) {
     return const generated.XswdDecisionCallbackOutcome.invalidPayload();
   }
+  late generated.XswdDecisionCallbackOutcome outcome;
   try {
     final decision = await Future<XelisXswdDecision>.sync(
       () => callback(authored),
     ).timeout(timeout);
-    return _decisionOutcomeToGenerated(decision);
+    outcome = _decisionOutcomeToGenerated(decision);
   } on TimeoutException {
-    return const generated.XswdDecisionCallbackOutcome.timeout();
+    outcome = const generated.XswdDecisionCallbackOutcome.timeout();
   } catch (_) {
-    return const generated.XswdDecisionCallbackOutcome.exception();
+    outcome = const generated.XswdDecisionCallbackOutcome.exception();
   }
+  onCompleted?.call(authored, outcome);
+  return outcome;
 }
 
 Future<generated.XswdDecisionCallbackOutcome> _runPrefetchDecisionCallback(
@@ -553,6 +573,11 @@ Future<generated.XswdDecisionCallbackOutcome> _runPrefetchDecisionCallback(
   required Duration timeout,
   required XelisXswdProjectionLimits limits,
   required GeneratedXswdApplicationAdapter applicationAdapter,
+  void Function(
+    XelisXswdRequest request,
+    generated.XswdDecisionCallbackOutcome outcome,
+  )?
+  onCompleted,
 }) async {
   final XelisXswdPrefetchPermissionsRequest authored;
   try {
@@ -565,11 +590,12 @@ Future<generated.XswdDecisionCallbackOutcome> _runPrefetchDecisionCallback(
   } catch (_) {
     return const generated.XswdDecisionCallbackOutcome.invalidPayload();
   }
+  late generated.XswdDecisionCallbackOutcome outcome;
   try {
     final decision = await Future<XelisXswdPrefetchDecision>.sync(
       () => callback(authored),
     ).timeout(timeout);
-    return switch (decision) {
+    outcome = switch (decision) {
       XelisXswdPrefetchNoChange() =>
         const generated.XswdDecisionCallbackOutcome.prefetchNoChange(),
       XelisXswdPrefetchGrant(:final permissions) =>
@@ -578,10 +604,12 @@ Future<generated.XswdDecisionCallbackOutcome> _runPrefetchDecisionCallback(
         ),
     };
   } on TimeoutException {
-    return const generated.XswdDecisionCallbackOutcome.timeout();
+    outcome = const generated.XswdDecisionCallbackOutcome.timeout();
   } catch (_) {
-    return const generated.XswdDecisionCallbackOutcome.exception();
+    outcome = const generated.XswdDecisionCallbackOutcome.exception();
   }
+  onCompleted?.call(authored.source, outcome);
+  return outcome;
 }
 
 XelisXswdPermissionPolicy _permissionPolicyFromGenerated(

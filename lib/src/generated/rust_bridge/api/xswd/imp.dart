@@ -9,7 +9,7 @@ import '../models/xswd_dtos.dart';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `apply_permission_updates`, `convert_encryption_mode`, `create_app_info_with_session_ref`, `create_app_info`, `create_event_summary`, `create_lifecycle_event_summary`, `decision_failure_code`, `encryption_key`, `fail_permission_projection`, `fail_prefetch_projection`, `handle_permission_outcome`, `handle_prefetch_permissions_outcome`, `invalid_xswd_session_reference`, `modify_app_permissions`, `notification_failure_code`, `permission_from_policy`, `permission_result_from_outcome`, `prefetch_permissions_from_decision`, `prefetch_permissions_from_outcome`, `prepare_xswd_event`, `prepare_xswd_lifecycle_notification`, `record_abandoned_xswd_notification`, `record_xswd_notification_outcome`, `validate_prefetch_grant`, `xswd_event_name`, `xswd_handler_with_registry`, `xswd_notification_name`, `xswd_permission_update_failed`, `xswd_session_close_failed`
+// These functions are ignored because they are not marked as `pub`: `apply_permission_updates`, `convert_encryption_mode`, `create_app_info_with_session_ref`, `create_app_info`, `create_event_summary`, `create_lifecycle_event_summary`, `decision_failure_code`, `encryption_key`, `fail_permission_projection`, `fail_prefetch_projection`, `handle_permission_outcome`, `handle_prefetch_permissions_outcome`, `invalid_xswd_session_reference`, `modify_app_permission_and_project`, `modify_app_permissions`, `notification_failure_code`, `permission_from_policy`, `permission_result_from_outcome`, `prefetch_permissions_from_decision`, `prefetch_permissions_from_outcome`, `prepare_xswd_event`, `prepare_xswd_lifecycle_notification`, `record_abandoned_xswd_notification`, `record_xswd_notification_outcome`, `validate_prefetch_grant`, `xswd_event_name`, `xswd_handler_with_registry`, `xswd_notification_name`, `xswd_permission_update_failed`, `xswd_session_close_failed`
 // These functions are ignored (category: IgnoreBecauseExplicitAttribute): `xswd_handler`
 
 abstract class XSWD {
@@ -38,6 +38,12 @@ abstract class XSWD {
   Future<List<AppInfo>> getApplicationPermissions();
 
   Future<bool> isXswdRunning();
+
+  Future<AppInfo> modifyApplicationPermission({
+    required BigInt sessionRef,
+    required String permission,
+    required PermissionPolicy policy,
+  });
 
   Future<void> modifyApplicationPermissions({
     required BigInt sessionRef,

@@ -339,6 +339,13 @@ abstract class XelisWallet implements RustOpaqueInterface, AddressBook, XSWD {
   Future<NativeAddressBookMigrationResult> migrateAddressBookV2();
 
   @override
+  Future<AppInfo> modifyApplicationPermission({
+    required BigInt sessionRef,
+    required String permission,
+    required PermissionPolicy policy,
+  });
+
+  @override
   Future<void> modifyApplicationPermissions({
     required BigInt sessionRef,
     required Map<String, PermissionPolicy> permissions,

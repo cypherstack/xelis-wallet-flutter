@@ -113,8 +113,8 @@ abstract interface class XelisWallet {
     required XelisXswdApplication application,
   });
 
-  /// Replaces the retained permission policies for the exact live
-  /// [application] session.
+  /// Updates the supplied retained permission policies for the exact live
+  /// [application] session while preserving every other policy.
   ///
   /// Permission keys use unprefixed method identifiers such as `get_balance`.
   /// A prefixed identifier such as `wallet.get_balance` fails before the native
@@ -122,6 +122,17 @@ abstract interface class XelisWallet {
   Future<void> updateXswdApplicationPermissions({
     required XelisXswdApplication application,
     required Map<String, XelisXswdPermissionPolicy> permissions,
+  });
+
+  /// Updates one retained permission of the exact live [application] session
+  /// and returns a fresh native projection of that same session.
+  ///
+  /// Other permissions are preserved. Reconstructed, stale, and other-wallet
+  /// projections are rejected.
+  Future<XelisXswdApplication> updateXswdApplicationPermission({
+    required XelisXswdApplication application,
+    required String permission,
+    required XelisXswdPermissionPolicy policy,
   });
 
   /// Opens a new pull-driven runtime and synchronization event subscription.

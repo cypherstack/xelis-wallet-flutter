@@ -78,6 +78,13 @@ pub trait XSWD {
         permissions: HashMap<String, PermissionPolicy>,
     ) -> std::result::Result<(), NativeXelisError>;
 
+    async fn modify_application_permission(
+        &self,
+        session_ref: u64,
+        permission: String,
+        policy: PermissionPolicy,
+    ) -> std::result::Result<AppInfo, NativeXelisError>;
+
     async fn close_application_session(
         &self,
         session_ref: u64,
@@ -155,6 +162,15 @@ impl XSWD for XelisWallet {
         _session_ref: u64,
         _permissions: HashMap<String, PermissionPolicy>,
     ) -> std::result::Result<(), NativeXelisError> {
+        Err(xswd_native_unavailable())
+    }
+
+    async fn modify_application_permission(
+        &self,
+        _session_ref: u64,
+        _permission: String,
+        _policy: PermissionPolicy,
+    ) -> std::result::Result<AppInfo, NativeXelisError> {
         Err(xswd_native_unavailable())
     }
 

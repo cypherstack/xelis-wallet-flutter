@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../api/assets/xelis_wallet_asset.dart';
 import '../../api/address_book/xelis_address_book.dart';
 import '../../api/data/xelis_data_element.dart';
@@ -37,6 +39,9 @@ import 'xelis_wallet_runtime_event_adapter.dart';
 import 'xelis_xswd_adapter.dart';
 
 part 'xelis_wallet_xswd_state.dart';
+
+const _xswdObservationTimeout = Duration(seconds: 2);
+const _xswdObservationInterval = Duration(milliseconds: 100);
 
 generated_business.NativeWalletExtraDataDisclosure
 _generatedExtraDataDisclosure(XelisWalletExtraDataDisclosure disclosure) =>
@@ -304,7 +309,11 @@ final class NativeXelisWallet implements XelisWallet {
       callbacks,
       operation: operation,
     );
-    final generatedCallbacks = _xswdState.generatedCallbacks(callbacks);
+    final generatedCallbacks = _xswdState.generatedCallbacks(
+      callbacks,
+      onDecisionCompleted: (request, outcome) =>
+          _scheduleXswdStateObservation(callbacks, request, outcome),
+    );
     await _runXswdLifecycleOperation(
       () => guardXelisFuture(
         () => _delegate.startXswd(
@@ -397,7 +406,11 @@ final class NativeXelisWallet implements XelisWallet {
       callbacks,
       operation: operation,
     );
-    final generatedCallbacks = _xswdState.generatedCallbacks(callbacks);
+    final generatedCallbacks = _xswdState.generatedCallbacks(
+      callbacks,
+      onDecisionCompleted: (request, outcome) =>
+          _scheduleXswdStateObservation(callbacks, request, outcome),
+    );
     await _runXswdApplicationOperation(relayer.id, () async {
       await guardXelisFuture(
         () => _delegate.addXswdRelayer(
@@ -464,6 +477,182 @@ final class NativeXelisWallet implements XelisWallet {
         operation: operation,
       ),
     );
+  }
+
+  @override
+  Future<XelisXswdApplication> updateXswdApplicationPermission({
+    required XelisXswdApplication application,
+    required String permission,
+    required XelisXswdPermissionPolicy policy,
+  }) async {
+    _ensureActive();
+    const operation = XelisWalletOperation.walletXswdPermissionsUpdate;
+    final generatedPolicy = generatedXswdPermissionsFromXelis({
+      permission: policy,
+    }, operation: operation)[permission]!;
+    final capability = _xswdState.capability(application, operation: operation);
+    final native = await guardXelisFuture(
+      () => _delegate.modifyApplicationPermission(
+        sessionRef: capability.sessionRef,
+        permission: permission,
+        policy: generatedPolicy,
+      ),
+      boundary: const XelisErrorBoundary(
+        source: XelisWalletErrorSource.xelisWallet,
+        operation: operation,
+      ),
+    );
+    final current = _xswdState.capability(application, operation: operation);
+    if (!identical(current, capability) ||
+        native.sessionRef != capability.sessionRef) {
+      throw xelisOperationPreconditionException(
+        operation: operation,
+        code: XelisWalletErrorCode.conflict,
+        nativeKind: 'XSWD_SESSION_REFERENCE_INVALID',
+        diagnosticMessage:
+            'The targeted XSWD permission update returned for a stale or '
+            'different application session.',
+      );
+    }
+    return _xswdState.adaptApplication(native, observedInState: true);
+  }
+
+  void _scheduleXswdStateObservation(
+    XelisXswdCallbacks callbacks,
+    XelisXswdRequest request,
+    generated_xswd.XswdDecisionCallbackOutcome outcome,
+  ) {
+    final observer = callbacks.onApplicationStateObservation;
+    if (observer == null) {
+      return;
+    }
+    final expectation = _xswdObservationExpectation(request, outcome);
+    if (expectation == null) {
+      return;
+    }
+    final sequence = _xswdState.nextObservationSequence();
+    final ticket = _xswdState.beginObservation(request.application, sequence);
+    if (ticket == null) {
+      unawaited(
+        _notifyXswdObserver(
+          observer,
+          XelisXswdApplicationStateStale(request.application, sequence),
+        ),
+      );
+      return;
+    }
+    unawaited(_observeXswdApplicationState(observer, expectation, ticket));
+  }
+
+  Future<void> _observeXswdApplicationState(
+    XelisXswdApplicationStateObservationCallback observer,
+    _NativeXswdObservationExpectation expectation,
+    _NativeXswdObservationTicket ticket,
+  ) async {
+    final deadline = DateTime.now().add(_xswdObservationTimeout);
+    await Future<void>.delayed(_xswdObservationInterval);
+    while (true) {
+      if (!_xswdState.isObservationCurrent(ticket)) {
+        await _notifyXswdObserver(
+          observer,
+          XelisXswdApplicationStateStale(
+            expectation.application,
+            ticket.sequence,
+          ),
+        );
+        return;
+      }
+
+      final List<generated_xswd.AppInfo> applications;
+      try {
+        applications = await guardXelisFuture(
+          _delegate.getApplicationPermissions,
+          boundary: const XelisErrorBoundary(
+            source: XelisWalletErrorSource.xelisWallet,
+            operation: XelisWalletOperation.walletXswdStateRead,
+          ),
+        );
+      } catch (error) {
+        final failure = error is XelisWalletException
+            ? error
+            : xelisBridgeContractException(
+                operation: XelisWalletOperation.walletXswdStateRead,
+                nativeKind: 'XSWD_STATE_OBSERVATION_FAILED',
+                diagnosticMessage:
+                    'The native XSWD state observation failed outside the '
+                    'authored error contract.',
+              );
+        final observation = _xswdState.isObservationCurrent(ticket)
+            ? XelisXswdApplicationStateFailed(
+                expectation.application,
+                ticket.sequence,
+                failure,
+              )
+            : XelisXswdApplicationStateStale(
+                expectation.application,
+                ticket.sequence,
+              );
+        await _notifyXswdObserver(observer, observation);
+        return;
+      }
+
+      if (!_xswdState.isObservationCurrent(ticket)) {
+        await _notifyXswdObserver(
+          observer,
+          XelisXswdApplicationStateStale(
+            expectation.application,
+            ticket.sequence,
+          ),
+        );
+        return;
+      }
+      generated_xswd.AppInfo? matching;
+      for (final application in applications) {
+        if (application.sessionRef == ticket.capability.sessionRef) {
+          matching = application;
+          break;
+        }
+      }
+      if (matching != null && expectation.matches(matching)) {
+        final observed = _xswdState.adaptObservedApplication(matching, ticket);
+        if (observed != null) {
+          await _notifyXswdObserver(
+            observer,
+            XelisXswdApplicationStateObserved(observed, ticket.sequence),
+          );
+          return;
+        }
+      }
+
+      final remaining = deadline.difference(DateTime.now());
+      if (remaining <= Duration.zero) {
+        await _notifyXswdObserver(
+          observer,
+          XelisXswdApplicationStateTimedOut(
+            expectation.application,
+            ticket.sequence,
+          ),
+        );
+        return;
+      }
+      await Future<void>.delayed(
+        remaining < _xswdObservationInterval
+            ? remaining
+            : _xswdObservationInterval,
+      );
+    }
+  }
+
+  Future<void> _notifyXswdObserver(
+    XelisXswdApplicationStateObservationCallback observer,
+    XelisXswdApplicationStateObservation observation,
+  ) async {
+    try {
+      await Future<void>.sync(() => observer(observation))
+          .timeout(_xswdObservationTimeout);
+    } catch (_) {
+      // Observation notifications are advisory and never affect XSWD state.
+    }
   }
 
   @override

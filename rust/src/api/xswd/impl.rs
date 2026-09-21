@@ -86,6 +86,13 @@ pub trait XSWD {
         permissions: HashMap<String, PermissionPolicy>,
     ) -> std::result::Result<(), NativeXelisError>;
 
+    async fn modify_application_permission(
+        &self,
+        session_ref: u64,
+        permission: String,
+        policy: PermissionPolicy,
+    ) -> std::result::Result<AppInfo, NativeXelisError>;
+
     async fn close_application_session(
         &self,
         session_ref: u64,
@@ -323,6 +330,52 @@ impl XSWD for XelisWallet {
         Err(invalid_xswd_session_reference())
     }
 
+    async fn modify_application_permission(
+        &self,
+        session_ref: u64,
+        permission: String,
+        policy: PermissionPolicy,
+    ) -> std::result::Result<AppInfo, NativeXelisError> {
+        let target = self
+            .xswd_sessions()
+            .lock()
+            .await
+            .resolve(session_ref)
+            .ok_or_else(invalid_xswd_session_reference)?;
+        let update = HashMap::from([(permission, policy)]);
+
+        #[cfg(all(not(target_arch = "wasm32"), feature = "api_server"))]
+        {
+            let lock = self.get_wallet().get_api_server().lock().await;
+            if let Some(APIServer::XSWD(xswd)) = lock.as_ref() {
+                let applications = xswd.get_handler().get_applications().read().await;
+                if let Some((_, app)) = applications
+                    .iter()
+                    .find(|(_, app)| Arc::ptr_eq(app, &target))
+                {
+                    return modify_app_permission_and_project(app, &update, false, session_ref)
+                        .await
+                        .map_err(xswd_permission_update_failed);
+                }
+            }
+        }
+
+        let relayer_lock = self.get_wallet().xswd_relayer().lock().await;
+        if let Some(relayer) = relayer_lock.as_ref() {
+            let relayer_apps = relayer.applications().read().await;
+            if let Some((app, _)) = relayer_apps
+                .iter()
+                .find(|(app, _)| Arc::ptr_eq(app, &target))
+            {
+                return modify_app_permission_and_project(app, &update, true, session_ref)
+                    .await
+                    .map_err(xswd_permission_update_failed);
+            }
+        }
+
+        Err(invalid_xswd_session_reference())
+    }
+
     async fn close_application_session(
         &self,
         session_ref: u64,
@@ -530,6 +583,16 @@ async fn modify_app_permissions(
 
     let mut current = app.get_permissions().lock().await;
     apply_permission_updates(&mut current, permissions)
+}
+
+async fn modify_app_permission_and_project(
+    app: &Arc<AppState>,
+    update: &HashMap<String, PermissionPolicy>,
+    is_relayer: bool,
+    session_ref: u64,
+) -> Result<AppInfo> {
+    modify_app_permissions(app, update).await?;
+    Ok(create_app_info_with_session_ref(app, is_relayer, session_ref).await)
 }
 
 fn encryption_key(key: Vec<u8>) -> Result<[u8; 32]> {

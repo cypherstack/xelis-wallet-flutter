@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import '../errors/xelis_wallet_exception.dart';
+
 /// Policy retained for one permission of an active XSWD application.
 enum XelisXswdPermissionPolicy { ask, accept, reject }
 
@@ -249,6 +251,73 @@ final class XelisXswdState {
       'applicationCount=${applications.length})';
 }
 
+/// Result of a bounded native-state observation started after an XSWD
+/// decision that may change admission or retained permissions.
+///
+/// The observation is informational: the decision callback has already
+/// returned to the native wallet before XWF starts reading state. Consumers
+/// must not interpret it as an atomic protocol acknowledgement.
+sealed class XelisXswdApplicationStateObservation {
+  const XelisXswdApplicationStateObservation(this.application, this.sequence);
+
+  /// Application projection associated with the observation.
+  ///
+  /// Only [XelisXswdApplicationStateObserved.application] is guaranteed to be
+  /// a fresh native-state projection. Other outcomes retain the source
+  /// projection for correlation and may no longer authorize operations.
+  final XelisXswdApplication application;
+
+  /// Wallet-local ordering value for this observation.
+  ///
+  /// Consumers may discard an outcome whose sequence is older than the latest
+  /// one handled for the same opaque session reference. This number carries no
+  /// native authority and is not stable across wallet handles or restarts.
+  final int sequence;
+}
+
+/// The expected application admission or permission policies were observed.
+final class XelisXswdApplicationStateObserved
+    extends XelisXswdApplicationStateObservation {
+  const XelisXswdApplicationStateObserved(super.application, super.sequence);
+
+  @override
+  String toString() => 'XelisXswdApplicationStateObserved()';
+}
+
+/// The observation was replaced or its exact session stopped being current.
+final class XelisXswdApplicationStateStale
+    extends XelisXswdApplicationStateObservation {
+  const XelisXswdApplicationStateStale(super.application, super.sequence);
+
+  @override
+  String toString() => 'XelisXswdApplicationStateStale()';
+}
+
+/// Native state did not reflect the expected result within the bounded wait.
+final class XelisXswdApplicationStateTimedOut
+    extends XelisXswdApplicationStateObservation {
+  const XelisXswdApplicationStateTimedOut(super.application, super.sequence);
+
+  @override
+  String toString() => 'XelisXswdApplicationStateTimedOut()';
+}
+
+/// Reading the native application state failed.
+final class XelisXswdApplicationStateFailed
+    extends XelisXswdApplicationStateObservation {
+  const XelisXswdApplicationStateFailed(
+    super.application,
+    super.sequence,
+    this.error,
+  );
+
+  /// Structured authored failure from the state-read boundary.
+  final XelisWalletException error;
+
+  @override
+  String toString() => 'XelisXswdApplicationStateFailed()';
+}
+
 /// Authored XSWD request delivered to a consumer callback.
 ///
 /// [payload] is an object for permission and prefetch-permission requests and
@@ -467,6 +536,11 @@ final class XelisXswdRelayer {
 typedef XelisXswdNotificationCallback = FutureOr<void> Function(
   XelisXswdRequest request,
 );
+
+/// Optional notification for bounded post-decision native-state observation.
+typedef XelisXswdApplicationStateObservationCallback = FutureOr<void> Function(
+  XelisXswdApplicationStateObservation observation,
+);
 typedef XelisXswdDecisionCallback = FutureOr<XelisXswdDecision> Function(
   XelisXswdRequest request,
 );
@@ -529,6 +603,7 @@ final class XelisXswdCallbacks {
     required this.onPrefetchPermissionsRequest,
     required this.onApplicationDisconnect,
     this.onPrefetchPermissionsReview,
+    this.onApplicationStateObservation,
     this.timeout = const Duration(minutes: 1),
     this.projectionLimits = const XelisXswdProjectionLimits(),
   });
@@ -545,6 +620,13 @@ final class XelisXswdCallbacks {
   /// consumers retain source compatibility and unchanged behavior.
   final XelisXswdPrefetchDecisionCallback? onPrefetchPermissionsReview;
   final XelisXswdNotificationCallback onApplicationDisconnect;
+
+  /// Optional result notification for bounded native-state reconciliation.
+  ///
+  /// XWF performs no observation work when this callback is absent. Callback
+  /// completion is never awaited by the original XSWD decision.
+  final XelisXswdApplicationStateObservationCallback?
+  onApplicationStateObservation;
 
   /// Maximum time an individual XSWD callback future may remain pending.
   final Duration timeout;

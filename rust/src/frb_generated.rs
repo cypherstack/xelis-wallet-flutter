@@ -47,7 +47,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1872998055;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1263267762;
 
 // Section: executor
 
@@ -4286,6 +4286,72 @@ fn wire__crate__api__wallet__XelisWallet_migrate_address_book_v2_impl(
                             &*api_that_guard,
                         )
                         .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet__XelisWallet_modify_application_permission_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "XelisWallet_modify_application_permission",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XelisWallet>,
+            >>::sse_decode(&mut deserializer);
+            let api_session_ref = <u64>::sse_decode(&mut deserializer);
+            let api_permission = <String>::sse_decode(&mut deserializer);
+            let api_policy =
+                <crate::api::models::xswd_dtos::PermissionPolicy>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::NativeXelisError>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok =
+                            crate::api::wallet::XelisWallet::modify_application_permission(
+                                &*api_that_guard,
+                                api_session_ref,
+                                api_permission,
+                                api_policy,
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
                     })()
                     .await,
@@ -9460,101 +9526,102 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-                        30 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_next_event_impl(port, ptr, rust_vec_len, data_len),
-33 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_next_event_impl(port, ptr, rust_vec_len, data_len),
-34 => wire__crate__api__wallet__XelisWallet_add_xswd_relayer_impl(port, ptr, rust_vec_len, data_len),
-35 => wire__crate__api__wallet__XelisWallet_broadcast_prepared_transaction_impl(port, ptr, rust_vec_len, data_len),
-36 => wire__crate__api__wallet__XelisWallet_broadcast_transaction_impl(port, ptr, rust_vec_len, data_len),
-38 => wire__crate__api__wallet__XelisWallet_cancel_prepared_transaction_impl(port, ptr, rust_vec_len, data_len),
-39 => wire__crate__api__wallet__XelisWallet_change_password_impl(port, ptr, rust_vec_len, data_len),
-40 => wire__crate__api__wallet__XelisWallet_clear_transaction_impl(port, ptr, rust_vec_len, data_len),
-41 => wire__crate__api__wallet__XelisWallet_close_impl(port, ptr, rust_vec_len, data_len),
-42 => wire__crate__api__wallet__XelisWallet_close_application_session_impl(port, ptr, rust_vec_len, data_len),
-43 => wire__crate__api__wallet__XelisWallet_convert_transactions_to_csv_impl(port, ptr, rust_vec_len, data_len),
-44 => wire__crate__api__wallet__XelisWallet_count_contacts_impl(port, ptr, rust_vec_len, data_len),
-45 => wire__crate__api__wallet__XelisWallet_create_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-46 => wire__crate__api__wallet__XelisWallet_create_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
-47 => wire__crate__api__wallet__XelisWallet_create_multisig_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-48 => wire__crate__api__wallet__XelisWallet_create_multisig_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
-49 => wire__crate__api__wallet__XelisWallet_create_multisig_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-50 => wire__crate__api__wallet__XelisWallet_create_multisig_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
-51 => wire__crate__api__wallet__XelisWallet_create_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-52 => wire__crate__api__wallet__XelisWallet_create_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
-53 => wire__crate__api__wallet__XelisWallet_estimate_fees_impl(port, ptr, rust_vec_len, data_len),
-54 => wire__crate__api__wallet__XelisWallet_estimate_transfer_fees_atomic_impl(port, ptr, rust_vec_len, data_len),
-55 => wire__crate__api__wallet__XelisWallet_export_transactions_to_csv_file_impl(port, ptr, rust_vec_len, data_len),
-56 => wire__crate__api__wallet__XelisWallet_finalize_multisig_transaction_impl(port, ptr, rust_vec_len, data_len),
-57 => wire__crate__api__wallet__XelisWallet_find_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
-58 => wire__crate__api__wallet__XelisWallet_find_contact_by_address_impl(port, ptr, rust_vec_len, data_len),
-59 => wire__crate__api__wallet__XelisWallet_find_contacts_by_name_impl(port, ptr, rust_vec_len, data_len),
-60 => wire__crate__api__wallet__XelisWallet_format_coin_impl(port, ptr, rust_vec_len, data_len),
-62 => wire__crate__api__wallet__XelisWallet_get_application_permissions_impl(port, ptr, rust_vec_len, data_len),
-63 => wire__crate__api__wallet__XelisWallet_get_asset_decimals_impl(port, ptr, rust_vec_len, data_len),
-64 => wire__crate__api__wallet__XelisWallet_get_asset_metadata_impl(port, ptr, rust_vec_len, data_len),
-65 => wire__crate__api__wallet__XelisWallet_get_asset_ticker_impl(port, ptr, rust_vec_len, data_len),
-66 => wire__crate__api__wallet__XelisWallet_get_daemon_info_impl(port, ptr, rust_vec_len, data_len),
-67 => wire__crate__api__wallet__XelisWallet_get_history_count_impl(port, ptr, rust_vec_len, data_len),
-68 => wire__crate__api__wallet__XelisWallet_get_known_assets_impl(port, ptr, rust_vec_len, data_len),
-69 => wire__crate__api__wallet__XelisWallet_get_multisig_state_impl(port, ptr, rust_vec_len, data_len),
-71 => wire__crate__api__wallet__XelisWallet_get_nonce_impl(port, ptr, rust_vec_len, data_len),
-72 => wire__crate__api__wallet__XelisWallet_get_pending_transaction_by_hash_impl(port, ptr, rust_vec_len, data_len),
-73 => wire__crate__api__wallet__XelisWallet_get_pending_transactions_impl(port, ptr, rust_vec_len, data_len),
-74 => wire__crate__api__wallet__XelisWallet_get_seed_impl(port, ptr, rust_vec_len, data_len),
-75 => wire__crate__api__wallet__XelisWallet_get_tracked_balances_impl(port, ptr, rust_vec_len, data_len),
-76 => wire__crate__api__wallet__XelisWallet_get_transaction_by_hash_impl(port, ptr, rust_vec_len, data_len),
-77 => wire__crate__api__wallet__XelisWallet_get_xelis_balance_impl(port, ptr, rust_vec_len, data_len),
-78 => wire__crate__api__wallet__XelisWallet_has_asset_balance_impl(port, ptr, rust_vec_len, data_len),
-79 => wire__crate__api__wallet__XelisWallet_history_impl(port, ptr, rust_vec_len, data_len),
-80 => wire__crate__api__wallet__XelisWallet_init_delete_multisig_impl(port, ptr, rust_vec_len, data_len),
-81 => wire__crate__api__wallet__XelisWallet_inspect_multisig_signature_share_impl(port, ptr, rust_vec_len, data_len),
-82 => wire__crate__api__wallet__XelisWallet_inspect_multisig_signing_request_impl(port, ptr, rust_vec_len, data_len),
-83 => wire__crate__api__wallet__XelisWallet_inspect_prepared_transfer_extra_data_impl(port, ptr, rust_vec_len, data_len),
-85 => wire__crate__api__wallet__XelisWallet_is_contact_present_impl(port, ptr, rust_vec_len, data_len),
-86 => wire__crate__api__wallet__XelisWallet_is_online_impl(port, ptr, rust_vec_len, data_len),
-87 => wire__crate__api__wallet__XelisWallet_is_syncing_impl(port, ptr, rust_vec_len, data_len),
-88 => wire__crate__api__wallet__XelisWallet_is_valid_password_impl(port, ptr, rust_vec_len, data_len),
-89 => wire__crate__api__wallet__XelisWallet_is_xswd_running_impl(port, ptr, rust_vec_len, data_len),
-90 => wire__crate__api__wallet__XelisWallet_list_address_book_entries_v2_impl(port, ptr, rust_vec_len, data_len),
-91 => wire__crate__api__wallet__XelisWallet_match_address_book_address_v2_impl(port, ptr, rust_vec_len, data_len),
-92 => wire__crate__api__wallet__XelisWallet_match_address_book_destination_v2_impl(port, ptr, rust_vec_len, data_len),
-93 => wire__crate__api__wallet__XelisWallet_migrate_address_book_v2_impl(port, ptr, rust_vec_len, data_len),
-94 => wire__crate__api__wallet__XelisWallet_modify_application_permissions_impl(port, ptr, rust_vec_len, data_len),
-95 => wire__crate__api__wallet__XelisWallet_multisig_setup_impl(port, ptr, rust_vec_len, data_len),
-96 => wire__crate__api__wallet__XelisWallet_offline_mode_impl(port, ptr, rust_vec_len, data_len),
-97 => wire__crate__api__wallet__XelisWallet_online_mode_impl(port, ptr, rust_vec_len, data_len),
-98 => wire__crate__api__wallet__XelisWallet_prepare_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-99 => wire__crate__api__wallet__XelisWallet_prepare_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
-100 => wire__crate__api__wallet__XelisWallet_prepare_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
-101 => wire__crate__api__wallet__XelisWallet_prepare_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
-102 => wire__crate__api__wallet__XelisWallet_remove_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
-103 => wire__crate__api__wallet__XelisWallet_remove_contact_impl(port, ptr, rust_vec_len, data_len),
-104 => wire__crate__api__wallet__XelisWallet_rescan_impl(port, ptr, rust_vec_len, data_len),
-105 => wire__crate__api__wallet__XelisWallet_retrieve_contacts_impl(port, ptr, rust_vec_len, data_len),
-106 => wire__crate__api__wallet__XelisWallet_sign_multisig_signing_request_impl(port, ptr, rust_vec_len, data_len),
-107 => wire__crate__api__wallet__XelisWallet_start_xswd_impl(port, ptr, rust_vec_len, data_len),
-108 => wire__crate__api__wallet__XelisWallet_stop_xswd_impl(port, ptr, rust_vec_len, data_len),
-109 => wire__crate__api__wallet__XelisWallet_subscribe_business_events_impl(port, ptr, rust_vec_len, data_len),
-110 => wire__crate__api__wallet__XelisWallet_subscribe_runtime_events_impl(port, ptr, rust_vec_len, data_len),
-111 => wire__crate__api__wallet__XelisWallet_track_asset_impl(port, ptr, rust_vec_len, data_len),
-112 => wire__crate__api__wallet__XelisWallet_untrack_asset_impl(port, ptr, rust_vec_len, data_len),
-113 => wire__crate__api__wallet__XelisWallet_upsert_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
-114 => wire__crate__api__wallet__XelisWallet_upsert_contact_impl(port, ptr, rust_vec_len, data_len),
-115 => wire__crate__api__progress_report__add_progress_report_impl(port, ptr, rust_vec_len, data_len),
-116 => wire__crate__api__models__address_book_dtos__address_book_data_get_all_entries_impl(port, ptr, rust_vec_len, data_len),
-117 => wire__crate__api__precomputed_tables__are_precomputed_tables_available_impl(port, ptr, rust_vec_len, data_len),
-119 => wire__crate__api__api__create_log_stream_impl(port, ptr, rust_vec_len, data_len),
-120 => wire__crate__api__api__create_progress_report_stream_impl(port, ptr, rust_vec_len, data_len),
-121 => wire__crate__api__wallet__create_xelis_wallet_impl(port, ptr, rust_vec_len, data_len),
-123 => wire__crate__api__wallet__get_current_precomputed_tables_type_impl(port, ptr, rust_vec_len, data_len),
-124 => wire__crate__api__api__initialize_crypto_provider_impl(port, ptr, rust_vec_len, data_len),
-125 => wire__crate__api__api__initialize_xelis_config_impl(port, ptr, rust_vec_len, data_len),
-128 => wire__crate__api__models__xswd_dtos__native_xswd_projection_limits_default_impl(port, ptr, rust_vec_len, data_len),
-129 => wire__crate__api__wallet__open_xelis_wallet_impl(port, ptr, rust_vec_len, data_len),
-131 => wire__crate__api__precomputed_tables__precomputed_table_type_index_impl(port, ptr, rust_vec_len, data_len),
-132 => wire__crate__api__precomputed_tables__precomputed_table_type_name_impl(port, ptr, rust_vec_len, data_len),
-133 => wire__crate__api__precomputed_tables__precomputed_table_type_to_l1_size_impl(port, ptr, rust_vec_len, data_len),
-136 => wire__crate__api__api__set_up_rust_logger_impl(port, ptr, rust_vec_len, data_len),
-137 => wire__crate__api__wallet__update_tables_impl(port, ptr, rust_vec_len, data_len),
+                        31 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_next_event_impl(port, ptr, rust_vec_len, data_len),
+34 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_next_event_impl(port, ptr, rust_vec_len, data_len),
+35 => wire__crate__api__wallet__XelisWallet_add_xswd_relayer_impl(port, ptr, rust_vec_len, data_len),
+36 => wire__crate__api__wallet__XelisWallet_broadcast_prepared_transaction_impl(port, ptr, rust_vec_len, data_len),
+37 => wire__crate__api__wallet__XelisWallet_broadcast_transaction_impl(port, ptr, rust_vec_len, data_len),
+39 => wire__crate__api__wallet__XelisWallet_cancel_prepared_transaction_impl(port, ptr, rust_vec_len, data_len),
+40 => wire__crate__api__wallet__XelisWallet_change_password_impl(port, ptr, rust_vec_len, data_len),
+41 => wire__crate__api__wallet__XelisWallet_clear_transaction_impl(port, ptr, rust_vec_len, data_len),
+42 => wire__crate__api__wallet__XelisWallet_close_impl(port, ptr, rust_vec_len, data_len),
+43 => wire__crate__api__wallet__XelisWallet_close_application_session_impl(port, ptr, rust_vec_len, data_len),
+44 => wire__crate__api__wallet__XelisWallet_convert_transactions_to_csv_impl(port, ptr, rust_vec_len, data_len),
+45 => wire__crate__api__wallet__XelisWallet_count_contacts_impl(port, ptr, rust_vec_len, data_len),
+46 => wire__crate__api__wallet__XelisWallet_create_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+47 => wire__crate__api__wallet__XelisWallet_create_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
+48 => wire__crate__api__wallet__XelisWallet_create_multisig_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+49 => wire__crate__api__wallet__XelisWallet_create_multisig_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
+50 => wire__crate__api__wallet__XelisWallet_create_multisig_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+51 => wire__crate__api__wallet__XelisWallet_create_multisig_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
+52 => wire__crate__api__wallet__XelisWallet_create_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+53 => wire__crate__api__wallet__XelisWallet_create_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
+54 => wire__crate__api__wallet__XelisWallet_estimate_fees_impl(port, ptr, rust_vec_len, data_len),
+55 => wire__crate__api__wallet__XelisWallet_estimate_transfer_fees_atomic_impl(port, ptr, rust_vec_len, data_len),
+56 => wire__crate__api__wallet__XelisWallet_export_transactions_to_csv_file_impl(port, ptr, rust_vec_len, data_len),
+57 => wire__crate__api__wallet__XelisWallet_finalize_multisig_transaction_impl(port, ptr, rust_vec_len, data_len),
+58 => wire__crate__api__wallet__XelisWallet_find_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
+59 => wire__crate__api__wallet__XelisWallet_find_contact_by_address_impl(port, ptr, rust_vec_len, data_len),
+60 => wire__crate__api__wallet__XelisWallet_find_contacts_by_name_impl(port, ptr, rust_vec_len, data_len),
+61 => wire__crate__api__wallet__XelisWallet_format_coin_impl(port, ptr, rust_vec_len, data_len),
+63 => wire__crate__api__wallet__XelisWallet_get_application_permissions_impl(port, ptr, rust_vec_len, data_len),
+64 => wire__crate__api__wallet__XelisWallet_get_asset_decimals_impl(port, ptr, rust_vec_len, data_len),
+65 => wire__crate__api__wallet__XelisWallet_get_asset_metadata_impl(port, ptr, rust_vec_len, data_len),
+66 => wire__crate__api__wallet__XelisWallet_get_asset_ticker_impl(port, ptr, rust_vec_len, data_len),
+67 => wire__crate__api__wallet__XelisWallet_get_daemon_info_impl(port, ptr, rust_vec_len, data_len),
+68 => wire__crate__api__wallet__XelisWallet_get_history_count_impl(port, ptr, rust_vec_len, data_len),
+69 => wire__crate__api__wallet__XelisWallet_get_known_assets_impl(port, ptr, rust_vec_len, data_len),
+70 => wire__crate__api__wallet__XelisWallet_get_multisig_state_impl(port, ptr, rust_vec_len, data_len),
+72 => wire__crate__api__wallet__XelisWallet_get_nonce_impl(port, ptr, rust_vec_len, data_len),
+73 => wire__crate__api__wallet__XelisWallet_get_pending_transaction_by_hash_impl(port, ptr, rust_vec_len, data_len),
+74 => wire__crate__api__wallet__XelisWallet_get_pending_transactions_impl(port, ptr, rust_vec_len, data_len),
+75 => wire__crate__api__wallet__XelisWallet_get_seed_impl(port, ptr, rust_vec_len, data_len),
+76 => wire__crate__api__wallet__XelisWallet_get_tracked_balances_impl(port, ptr, rust_vec_len, data_len),
+77 => wire__crate__api__wallet__XelisWallet_get_transaction_by_hash_impl(port, ptr, rust_vec_len, data_len),
+78 => wire__crate__api__wallet__XelisWallet_get_xelis_balance_impl(port, ptr, rust_vec_len, data_len),
+79 => wire__crate__api__wallet__XelisWallet_has_asset_balance_impl(port, ptr, rust_vec_len, data_len),
+80 => wire__crate__api__wallet__XelisWallet_history_impl(port, ptr, rust_vec_len, data_len),
+81 => wire__crate__api__wallet__XelisWallet_init_delete_multisig_impl(port, ptr, rust_vec_len, data_len),
+82 => wire__crate__api__wallet__XelisWallet_inspect_multisig_signature_share_impl(port, ptr, rust_vec_len, data_len),
+83 => wire__crate__api__wallet__XelisWallet_inspect_multisig_signing_request_impl(port, ptr, rust_vec_len, data_len),
+84 => wire__crate__api__wallet__XelisWallet_inspect_prepared_transfer_extra_data_impl(port, ptr, rust_vec_len, data_len),
+86 => wire__crate__api__wallet__XelisWallet_is_contact_present_impl(port, ptr, rust_vec_len, data_len),
+87 => wire__crate__api__wallet__XelisWallet_is_online_impl(port, ptr, rust_vec_len, data_len),
+88 => wire__crate__api__wallet__XelisWallet_is_syncing_impl(port, ptr, rust_vec_len, data_len),
+89 => wire__crate__api__wallet__XelisWallet_is_valid_password_impl(port, ptr, rust_vec_len, data_len),
+90 => wire__crate__api__wallet__XelisWallet_is_xswd_running_impl(port, ptr, rust_vec_len, data_len),
+91 => wire__crate__api__wallet__XelisWallet_list_address_book_entries_v2_impl(port, ptr, rust_vec_len, data_len),
+92 => wire__crate__api__wallet__XelisWallet_match_address_book_address_v2_impl(port, ptr, rust_vec_len, data_len),
+93 => wire__crate__api__wallet__XelisWallet_match_address_book_destination_v2_impl(port, ptr, rust_vec_len, data_len),
+94 => wire__crate__api__wallet__XelisWallet_migrate_address_book_v2_impl(port, ptr, rust_vec_len, data_len),
+95 => wire__crate__api__wallet__XelisWallet_modify_application_permission_impl(port, ptr, rust_vec_len, data_len),
+96 => wire__crate__api__wallet__XelisWallet_modify_application_permissions_impl(port, ptr, rust_vec_len, data_len),
+97 => wire__crate__api__wallet__XelisWallet_multisig_setup_impl(port, ptr, rust_vec_len, data_len),
+98 => wire__crate__api__wallet__XelisWallet_offline_mode_impl(port, ptr, rust_vec_len, data_len),
+99 => wire__crate__api__wallet__XelisWallet_online_mode_impl(port, ptr, rust_vec_len, data_len),
+100 => wire__crate__api__wallet__XelisWallet_prepare_burn_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+101 => wire__crate__api__wallet__XelisWallet_prepare_burn_transaction_impl(port, ptr, rust_vec_len, data_len),
+102 => wire__crate__api__wallet__XelisWallet_prepare_transfer_all_transaction_impl(port, ptr, rust_vec_len, data_len),
+103 => wire__crate__api__wallet__XelisWallet_prepare_transfers_transaction_impl(port, ptr, rust_vec_len, data_len),
+104 => wire__crate__api__wallet__XelisWallet_remove_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
+105 => wire__crate__api__wallet__XelisWallet_remove_contact_impl(port, ptr, rust_vec_len, data_len),
+106 => wire__crate__api__wallet__XelisWallet_rescan_impl(port, ptr, rust_vec_len, data_len),
+107 => wire__crate__api__wallet__XelisWallet_retrieve_contacts_impl(port, ptr, rust_vec_len, data_len),
+108 => wire__crate__api__wallet__XelisWallet_sign_multisig_signing_request_impl(port, ptr, rust_vec_len, data_len),
+109 => wire__crate__api__wallet__XelisWallet_start_xswd_impl(port, ptr, rust_vec_len, data_len),
+110 => wire__crate__api__wallet__XelisWallet_stop_xswd_impl(port, ptr, rust_vec_len, data_len),
+111 => wire__crate__api__wallet__XelisWallet_subscribe_business_events_impl(port, ptr, rust_vec_len, data_len),
+112 => wire__crate__api__wallet__XelisWallet_subscribe_runtime_events_impl(port, ptr, rust_vec_len, data_len),
+113 => wire__crate__api__wallet__XelisWallet_track_asset_impl(port, ptr, rust_vec_len, data_len),
+114 => wire__crate__api__wallet__XelisWallet_untrack_asset_impl(port, ptr, rust_vec_len, data_len),
+115 => wire__crate__api__wallet__XelisWallet_upsert_address_book_entry_v2_impl(port, ptr, rust_vec_len, data_len),
+116 => wire__crate__api__wallet__XelisWallet_upsert_contact_impl(port, ptr, rust_vec_len, data_len),
+117 => wire__crate__api__progress_report__add_progress_report_impl(port, ptr, rust_vec_len, data_len),
+118 => wire__crate__api__models__address_book_dtos__address_book_data_get_all_entries_impl(port, ptr, rust_vec_len, data_len),
+119 => wire__crate__api__precomputed_tables__are_precomputed_tables_available_impl(port, ptr, rust_vec_len, data_len),
+121 => wire__crate__api__api__create_log_stream_impl(port, ptr, rust_vec_len, data_len),
+122 => wire__crate__api__api__create_progress_report_stream_impl(port, ptr, rust_vec_len, data_len),
+123 => wire__crate__api__wallet__create_xelis_wallet_impl(port, ptr, rust_vec_len, data_len),
+125 => wire__crate__api__wallet__get_current_precomputed_tables_type_impl(port, ptr, rust_vec_len, data_len),
+126 => wire__crate__api__api__initialize_crypto_provider_impl(port, ptr, rust_vec_len, data_len),
+127 => wire__crate__api__api__initialize_xelis_config_impl(port, ptr, rust_vec_len, data_len),
+130 => wire__crate__api__models__xswd_dtos__native_xswd_projection_limits_default_impl(port, ptr, rust_vec_len, data_len),
+131 => wire__crate__api__wallet__open_xelis_wallet_impl(port, ptr, rust_vec_len, data_len),
+133 => wire__crate__api__precomputed_tables__precomputed_table_type_index_impl(port, ptr, rust_vec_len, data_len),
+134 => wire__crate__api__precomputed_tables__precomputed_table_type_name_impl(port, ptr, rust_vec_len, data_len),
+135 => wire__crate__api__precomputed_tables__precomputed_table_type_to_l1_size_impl(port, ptr, rust_vec_len, data_len),
+138 => wire__crate__api__api__set_up_rust_logger_impl(port, ptr, rust_vec_len, data_len),
+139 => wire__crate__api__wallet__update_tables_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -9580,26 +9647,26 @@ fn pde_ffi_dispatcher_sync_impl(
 11 => wire__crate__api__models__wallet_dtos__SummaryTransaction_auto_accessor_set_fee_impl(ptr, rust_vec_len, data_len),
 12 => wire__crate__api__models__wallet_dtos__SummaryTransaction_auto_accessor_set_hash_impl(ptr, rust_vec_len, data_len),
 13 => wire__crate__api__models__wallet_dtos__SummaryTransaction_auto_accessor_set_transaction_type_impl(ptr, rust_vec_len, data_len),
-28 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_cancel_impl(ptr, rust_vec_len, data_len),
-29 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_generation_impl(ptr, rust_vec_len, data_len),
-31 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_cancel_impl(ptr, rust_vec_len, data_len),
-32 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_generation_impl(ptr, rust_vec_len, data_len),
-37 => wire__crate__api__wallet__XelisWallet_cancel_pending_multisig_request_impl(ptr, rust_vec_len, data_len),
-61 => wire__crate__api__wallet__XelisWallet_get_address_str_impl(ptr, rust_vec_len, data_len),
-70 => wire__crate__api__wallet__XelisWallet_get_network_impl(ptr, rust_vec_len, data_len),
-84 => wire__crate__api__wallet__XelisWallet_is_address_valid_for_multisig_impl(ptr, rust_vec_len, data_len),
-118 => wire__crate__api__wallet__clear_cached_tables_impl(ptr, rust_vec_len, data_len),
-122 => wire__crate__api__wallet__drop_wallet_impl(ptr, rust_vec_len, data_len),
-126 => wire__crate__api__utils__is_address_valid_impl(ptr, rust_vec_len, data_len),
-127 => wire__crate__api__utils__make_integrated_address_impl(ptr, rust_vec_len, data_len),
-130 => wire__crate__api__utils__parse_address_impl(ptr, rust_vec_len, data_len),
-134 => wire__crate__api__wallet__refresh_mt_params_impl(ptr, rust_vec_len, data_len),
-135 => wire__crate__api__wallet__set_mt_params_impl(ptr, rust_vec_len, data_len),
-138 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_app_disconnect_impl(ptr, rust_vec_len, data_len),
-139 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_application_request_impl(ptr, rust_vec_len, data_len),
-140 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_cancel_request_impl(ptr, rust_vec_len, data_len),
-141 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_permission_request_impl(ptr, rust_vec_len, data_len),
-142 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_prefetch_permissions_request_impl(ptr, rust_vec_len, data_len),
+29 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_cancel_impl(ptr, rust_vec_len, data_len),
+30 => wire__crate__api__wallet__business_events__WalletBusinessEventSubscription_generation_impl(ptr, rust_vec_len, data_len),
+32 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_cancel_impl(ptr, rust_vec_len, data_len),
+33 => wire__crate__api__wallet__runtime_events__WalletRuntimeEventSubscription_generation_impl(ptr, rust_vec_len, data_len),
+38 => wire__crate__api__wallet__XelisWallet_cancel_pending_multisig_request_impl(ptr, rust_vec_len, data_len),
+62 => wire__crate__api__wallet__XelisWallet_get_address_str_impl(ptr, rust_vec_len, data_len),
+71 => wire__crate__api__wallet__XelisWallet_get_network_impl(ptr, rust_vec_len, data_len),
+85 => wire__crate__api__wallet__XelisWallet_is_address_valid_for_multisig_impl(ptr, rust_vec_len, data_len),
+120 => wire__crate__api__wallet__clear_cached_tables_impl(ptr, rust_vec_len, data_len),
+124 => wire__crate__api__wallet__drop_wallet_impl(ptr, rust_vec_len, data_len),
+128 => wire__crate__api__utils__is_address_valid_impl(ptr, rust_vec_len, data_len),
+129 => wire__crate__api__utils__make_integrated_address_impl(ptr, rust_vec_len, data_len),
+132 => wire__crate__api__utils__parse_address_impl(ptr, rust_vec_len, data_len),
+136 => wire__crate__api__wallet__refresh_mt_params_impl(ptr, rust_vec_len, data_len),
+137 => wire__crate__api__wallet__set_mt_params_impl(ptr, rust_vec_len, data_len),
+140 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_app_disconnect_impl(ptr, rust_vec_len, data_len),
+141 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_application_request_impl(ptr, rust_vec_len, data_len),
+142 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_cancel_request_impl(ptr, rust_vec_len, data_len),
+143 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_permission_request_impl(ptr, rust_vec_len, data_len),
+144 => wire__crate__api__models__xswd_dtos__xswd_request_summary_is_prefetch_permissions_request_impl(ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }

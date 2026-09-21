@@ -15,8 +15,10 @@ One opened `XelisWallet` owns its local XSWD server and relayer sessions.
 - `getXswdState` returns the current running flag and connected applications.
 - `closeXswdApplicationSession` closes exactly the live session represented by
   the supplied `XelisXswdApplication` projection.
-- `updateXswdApplicationPermissions` replaces policies for that exact live
-  application projection.
+- `updateXswdApplicationPermissions` updates supplied policies for that exact
+  live application projection.
+- `updateXswdApplicationPermission` updates one policy, preserves every other
+  entry, and returns a fresh projection of the same native session.
 - `stopXswd` stops both the local server and relay sessions and is idempotent
   while stopped.
 
@@ -31,8 +33,10 @@ Each callback and state-list projection carries an opaque
 application-state instance compare equal, including between callbacks and
 state reads. The initial application-request projection is not operational
 while admission is still pending: close and permission update fail before FFI
-until a fresh `getXswdState` read confirms that exact instance was admitted.
-That read retains the same opaque reference. A different local or relayed
+until a fresh native state read confirms that exact instance was admitted.
+`getXswdState` performs such a read; an observed-state callback can also return
+the resulting fresh projection. That projection retains the same opaque
+reference. A different local or relayed
 instance remains distinct even when it uses the same application ID.
 Reconstructed applications, detached route placeholders, stale sessions, and
 projections owned by another wallet handle cannot authorize close or
@@ -77,6 +81,20 @@ no permission, and omitted permissions remain unchanged. Without the optional
 callback, the legacy accept/reject behavior is preserved: accept grants every
 requested permission and reject changes none. XWF does not decide which wallet
 methods an application should allow or preauthorize.
+
+`onApplicationStateObservation` is an optional advisory callback. After an
+accepted admission or a decision that can retain permission policies, XWF
+returns the decision first, then performs spaced native reads for at most two
+seconds. It reports exactly one of `XelisXswdApplicationStateObserved`,
+`XelisXswdApplicationStateStale`, `XelisXswdApplicationStateTimedOut`, or
+`XelisXswdApplicationStateFailed`. A newer observation for the same exact
+session replaces the older one. Stop, disconnect, replacement, and disposal
+make pending observations stale. No polling runs when the callback is absent,
+and no polling remains after an outcome. The observed result describes state
+seen after the decision; it is not an atomic protocol acknowledgement.
+Each outcome carries a wallet-local `sequence`; consumers can ignore an older
+sequence for the same opaque session reference. It is correlation metadata,
+not native authority, and is not stable across handles or restarts.
 
 Only one callback, decision or notification, is tracked as active at a time,
 and later callbacks remain ordered behind it. The dispatcher continues to

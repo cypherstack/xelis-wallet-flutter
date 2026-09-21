@@ -93,6 +93,30 @@ async fn app_info_preserves_identity_metadata_and_permission_policies() {
 }
 
 #[tokio::test]
+async fn targeted_permission_update_returns_fresh_projection_and_preserves_others() {
+    let app = app_state();
+    let info = modify_app_permission_and_project(
+        &app,
+        &HashMap::from([("get_balance".to_owned(), PermissionPolicy::Accept)]),
+        true,
+        42,
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(info.session_ref, 42);
+    assert!(info.is_relayer);
+    assert!(matches!(
+        info.permissions["get_balance"],
+        PermissionPolicy::Accept
+    ));
+    assert!(matches!(
+        info.permissions["build_transaction"],
+        PermissionPolicy::Ask
+    ));
+}
+
+#[tokio::test]
 async fn closing_one_handler_does_not_invalidate_another_handlers_session() {
     let registry = Arc::new(xelis_common::tokio::sync::Mutex::new(
         XswdSessionRegistry::default(),

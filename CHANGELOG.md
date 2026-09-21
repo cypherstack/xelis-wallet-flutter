@@ -7,6 +7,11 @@
 - Added optional selective XSWD prefetch decisions. Native validation applies
   only an exact requested subset and leaves omitted permissions unchanged;
   legacy prefetch callbacks keep their previous all-or-none behavior.
+- **Breaking for `XelisWallet` implementers:** Added targeted XSWD permission
+  edits that return a fresh application projection while preserving other
+  policies, plus optional bounded post-decision state observations that do not
+  delay decision callbacks. Implementers must provide
+  `updateXswdApplicationPermission`.
 
 ## 0.3.0
 
