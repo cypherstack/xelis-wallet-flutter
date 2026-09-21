@@ -14,6 +14,10 @@
   policies, plus optional bounded post-decision state observations that do not
   delay decision callbacks. Implementers must provide
   `updateXswdApplicationPermission`.
+- **Build:** Updated the Dart code-generation dependency to Freezed 4.0.2.
+- **Build:** Refreshed compatible Rust dependencies and re-pinned
+  `xelis_wallet` and `xelis_common` together to the published XELIS 1.25.0
+  commit.
 
 ## 0.3.0
 

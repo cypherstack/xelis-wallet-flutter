@@ -145,9 +145,9 @@ unverified browser engines, unrelated failures, and residual upstream gaps.
    emulator. Resolve failed or missing required checks before tagging.
 4. Run **Release evidence** manually on the same branch and confirm its SHA.
    This lightweight preflight reads existing results without rebuilding.
-5. Create the annotated tag on that validated commit. For version 0.3.0:
-   `git tag -a v0.3.0 <validated-commit> -m "Release 0.3.0"`.
-6. Push that tag explicitly with `git push origin v0.3.0`. The tag triggers
+5. Create the annotated tag on that validated commit:
+   `git tag -a vX.Y.Z <validated-commit> -m "Release X.Y.Z"`.
+6. Push that tag explicitly with `git push origin vX.Y.Z`. The tag triggers
    only **Release evidence**; inspect its result before announcing release.
 
 Tags are the Git installation boundary; this package is not published to
