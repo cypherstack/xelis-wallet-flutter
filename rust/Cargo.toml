@@ -20,8 +20,8 @@ log = "0.4"
 parking_lot = "0.12.1"
 lazy_static = "1.4.0"
 serde_json = "1"
-xelis_wallet = { git = "https://github.com/xelis-project/xelis-blockchain", rev = "b149b57aaeec42a27b0e1516a2e8ed8e00c6f394", package = "xelis_wallet", default-features = false, features = ["network_handler"] }
-xelis_common = { git = "https://github.com/xelis-project/xelis-blockchain", rev = "b149b57aaeec42a27b0e1516a2e8ed8e00c6f394", package = "xelis_common" }
+xelis_wallet = { git = "https://github.com/xelis-project/xelis-blockchain", rev = "db59b5c246ab0e40386d6c241dcd77f0aea84b10", package = "xelis_wallet", default-features = false, features = ["network_handler"] }
+xelis_common = { git = "https://github.com/xelis-project/xelis-blockchain", rev = "db59b5c246ab0e40386d6c241dcd77f0aea84b10", package = "xelis_common" }
 serde = { version = "1.0.197", features = ["derive"] }
 trie-rs = "0.4.2"
 regex = "1.11.1"
