@@ -48,6 +48,8 @@ Consumer builds keep their normal bundled-library loading. A passing host smoke
 is the lightweight pull-request boundary, not proof for every supported
 platform.
 
+Native builds use `--locked` and require an up-to-date `rust/Cargo.lock`.
+
 ## Real XSWD transport tests
 
 Two Rust tests intentionally use production Argon2 work and real loopback
