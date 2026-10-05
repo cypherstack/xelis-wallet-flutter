@@ -18,7 +18,7 @@ dependencies:
   xelis_wallet_flutter:
     git:
       url: https://github.com/xelis-project/xelis-wallet-flutter.git
-      ref: v0.4.0
+      ref: v0.4.1
 ```
 
 Then run `flutter pub get`.

@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.4.1
 
 - Fixed Android native builds to respect the consumer's minimum Android API.
+- **Build:** Native builds now enforce the committed Rust dependency lockfile.
 
 ## 0.4.0
 

@@ -3964,7 +3964,7 @@ dependencies = [
 
 [[package]]
 name = "xelis_wallet_flutter"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "flutter_rust_bridge",

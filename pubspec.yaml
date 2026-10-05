@@ -1,6 +1,6 @@
 name: xelis_wallet_flutter
 description: Shared Flutter bindings for the native XELIS wallet runtime.
-version: 0.4.0
+version: 0.4.1
 repository: https://github.com/xelis-project/xelis-wallet-flutter
 publish_to: none
 
