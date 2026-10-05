@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed Android native builds to respect the consumer's minimum Android API.
+
 ## 0.4.0
 
 - Added independent optional XSWD decision and lifecycle-notification callback
