@@ -27,7 +27,7 @@ Then run `flutter pub get`.
 
 Consumers need Dart 3.13 or later, Flutter 3.47 or later, and Rustup. Native
 targets compile the bundled Rust runtime through Flutter Native Assets. The
-package pins Rust 1.94.1 and its supported targets in
+package pins Rust 1.99.1 and its supported targets in
 `rust/rust-toolchain.toml`.
 
 | Target | Additional requirement |

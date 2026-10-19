@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Build:** Updated the pinned Rust toolchain from 1.94.1 to 1.99.1 while
+  retaining the same declared components and supported native targets.
+  Earlier toolchains strip Apple dynamic libraries with a misaligned
+  `__LINKEDIT` string pool, which iOS 27 and macOS 27 refuse to load.
+
 ## 0.4.1
 
 - Fixed Android native builds to respect the consumer's minimum Android API.
